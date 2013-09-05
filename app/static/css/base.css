@@ -1,0 +1,19 @@
+body {
+  padding-top: 50px;
+}
+.content {
+  padding: 40px 15px;
+  text-align: center;
+}
+
+.links > ul {
+  display: inline-block;
+}
+
+.links > ul i {
+  padding-right: 5px;
+}
+
+.thumbnail > button {
+  max-width: 180px;
+}

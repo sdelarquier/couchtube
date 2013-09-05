@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="input-group" style="margin: 0 5% 5% 5%;">
+  <span class="input-group-addon"><i class="icon-search"></i></span>
+  <input type="text" class="form-control" placeholder="TV show title (not yest working)">
+</div>
+<div class="well">
+  <div class="row" style='text-align: center;'>
+    {% macro thumb(title, poster) %}
+      <div class="col-sm-6 col-md-2">
+        <a href="#" class="thumbnail">
+          {% if poster == '' %}
+                <img src="static/img/thmb_def.svg" alt="{{ title }}" class="img-thumbnail">
+          {%- else -%}
+                <img src="{{ poster }}" alt="{{ title }}" class="img-thumbnail">
+          {%- endif -%}
+          <p style="margin: 5px;">{{ title }}</p>
+        </a>
+      </div>
+    {% endmacro %}
+    {% for show in series %}
+      {{ thumb(show[0], show[1]) }}
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

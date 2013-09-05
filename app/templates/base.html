@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Insight Data Science Project">
+    <meta name="author" content="Sebastien de Larquier">    
+    <!-- Le fav and touch icons -->  
+    <link rel="shortcut icon" href="static/ico/favicon.png">
+    <link rel="apple-touch-icon" href="static/ico/apple-touch-icon-57-precomposed.png">  
+    <link rel="apple-touch-icon" sizes="72x72" href="static/ico/apple-touch-icon-57-precomposed.png">  
+    <link rel="apple-touch-icon" sizes="114x114" href="static/ico/apple-touch-icon-57-precomposed.png">  
+
+    <title>CouchTube</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="static/css/bootstrap.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="static/css/base.css" rel="stylesheet">
+    {% block head %}
+    {% endblock %}
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="static/js/html5shiv.js"></script>
+      <script src="static/js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand", href='/'>CouchTube</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          {% macro nav_link(endpoint, name) %}
+            {% if endpoint == request.endpoint %}
+              <li class="active"><a href="{{ url_for(endpoint) }}">{{ name }}</a></li>
+            {%- else -%}
+              <li><a href="{{ url_for(endpoint) }}">{{ name }}</a></li>
+            {%- endif -%}
+          {% endmacro %}
+          <ul class="nav navbar-nav">
+            {{ nav_link('index', 'Home') }}
+            {{ nav_link('about', 'About') }}
+            {{ nav_link('contact', 'Contact') }}
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="content">
+
+    {% block content %}
+    {% endblock %}
+
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/bootstrap.min.js"></script>
+    {% block scripts %}
+    {% endblock %}
+  </body>
+</html>

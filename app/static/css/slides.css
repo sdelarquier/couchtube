@@ -1,0 +1,45 @@
+.content .deck-container {
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+  width: auto;
+  max-width: 864px;
+  min-width: 864px;
+  margin: 16px auto 24px auto;
+  min-height: 560px;
+  font-size: 16px;
+}
+
+.content .deck-container .title h1 {
+    text-align: left;
+    top: 50%;
+    color: #333;
+}
+
+.content .deck-container .title h3 {
+    text-align: left;
+    top: 62%;
+    left: 10%;
+    color: #444;
+    position: absolute;
+}
+
+.content .deck-container .title h4 {
+    text-align: right;
+    bottom: 5%;
+    right: 5%;
+    color: #444;
+    position: absolute;
+}
+
+.content .deck-container .title img {
+    margin: 0;
+}
+
+.content .deck-container .full img {
+    position: absolute;
+    width: 100%;
+    margin-left: -48px;
+    padding: 0;
+    height: 100%;
+}
