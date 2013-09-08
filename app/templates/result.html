@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block head %}
+  <title>Watch - Couchtube</title>
+{% endblock %}
+{% block content %}
+  <!-- <h3>{{ show }} ({{ year }})</h3> -->
+  <div class="row">
+<!--     <div class="col-xs-6 col-sm-4 col-md-2">
+      {% for ep in episodes %}
+        <img src="{{ ep[1][0] }}" class="img-rounded link-tooltip" data-toggle="tooltip" data-placement="right" data-original-title="S{{ ep[0][2] }} - E{{ ep[0][1] }} - {{ ep[1][1] }} ({{ ep[0][0] }})">
+      {% endfor %}
+    </div> -->
+    <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+    <iframe id="player" type="text/html"
+src="https://www.youtube.com/embed/M7lc1UVf-VE?rel=0&autohide=1&color=red&theme=dark"
+frameborder="0" allowfullscreen></iframe>
+  </div>
+  <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
+    <div><i class="icon-chevron-sign-up icon-large"></i></div>
+  </nav>
+{% endblock %}
+{% block scripts %}
+<!-- <script src="static/js/typeahead.js"></script> -->
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('.link-tooltip').tooltip()
+  });
+</script>
+{% endblock %}

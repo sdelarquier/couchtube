@@ -1,26 +1,52 @@
 {% extends "base.html" %}
+{% block head %}
+    <title>CouchTube</title>
+{% endblock %}
 {% block content %}
-<div class="input-group" style="margin: 0 5% 5% 5%;">
-  <span class="input-group-addon"><i class="icon-search"></i></span>
-  <input type="text" class="form-control" placeholder="TV show title (not yest working)">
-</div>
-<div class="well">
-  <div class="row" style='text-align: center;'>
-    {% macro thumb(title, poster) %}
-      <div class="col-sm-6 col-md-2">
-        <a href="#" class="thumbnail">
-          {% if poster == '' %}
-                <img src="static/img/thmb_def.svg" alt="{{ title }}" class="img-thumbnail">
-          {%- else -%}
-                <img src="{{ poster }}" alt="{{ title }}" class="img-thumbnail">
-          {%- endif -%}
-          <p style="margin: 5px;">{{ title }}</p>
-        </a>
+<div class="col-md-10 col-md-offset-1">
+  <!-- Input search -->
+  <div class="row">
+    <div class="col-md-8 col-md-offset-2">
+      <div class="input-group movies" style="margin: 0 5% 5% 5%;">
+        <span class="input-group-addon"><i class="icon-search"></i></span>
+        <input type="text" class="typeahead form-control" placeholder="TV show title (not yet working)">
       </div>
-    {% endmacro %}
-    {% for show in series %}
-      {{ thumb(show[0], show[1]) }}
-    {% endfor %}
+    </div>
+  </div>
+  <!-- Pre-generated links -->
+  <div class="well">
+    <div class="row" style='text-align: center;'>
+      {% macro thumb(title, year, poster) %}
+        <div class="col-xs-6 col-sm-4 col-md-2">
+          <a href="watch?show={{ title }}&year={{ year }}" data-toggle="tooltip" data-placement="top" data-original-title="{{ title }} ({{ year }})" class="link-tooltip">
+            <div style="position: relative;">
+            {% if poster %}
+              <img src="{{ poster }}" alt="{{ title }}-{{ year }}" class="img-thumbnail" onError="this.src='static/img/thmb_def.svg';">
+            {%- else -%}
+              <img src="static/img/thmb_def.svg" alt="{{ title }}" class="img-thumbnail">
+              <div class="img-over">{{ title }} ({{ year }})</div>
+            {%- endif -%}
+            </div>
+          </a>
+        </div>
+      {% endmacro %}
+      {% for show in series %}
+        {{ thumb(show[0], show[1], show[2]) }}
+      {% endfor %}
+    </div>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<!-- <script src="static/js/typeahead.js"></script> -->
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('.link-tooltip').tooltip()
+  });
+  // // single dataset
+  // $('input.typeahead').typeahead({
+  //   name: 'tv-shows',
+  //   local: ["Grand Designs", "Top Gear"]
+  // });
+</script>
 {% endblock %}

@@ -11,8 +11,6 @@
     <link rel="apple-touch-icon" sizes="72x72" href="static/ico/apple-touch-icon-57-precomposed.png">  
     <link rel="apple-touch-icon" sizes="114x114" href="static/ico/apple-touch-icon-57-precomposed.png">  
 
-    <title>CouchTube</title>
-
     <!-- Bootstrap core CSS -->
     <link href="static/css/bootstrap.css" rel="stylesheet">
     <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
@@ -54,6 +52,11 @@
             {{ nav_link('about', 'About') }}
             {{ nav_link('contact', 'Contact') }}
           </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <button type="button" class="btn btn-default navbar-btn" onclick="toggleLights()" id="lights"><i class="icon-lightbulb"></i></button>
+            </li>
+          </ul>
         </div><!--/.nav-collapse -->
       </div>
     </div>
@@ -71,6 +74,13 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="static/js/jquery.js"></script>
     <script src="static/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      function toggleLights() {
+        $("body").toggleClass('dark');
+        $(".well").toggleClass('well-dark');
+        $("#lights").toggleClass('btn-primary');
+      }
+    </script>
     {% block scripts %}
     {% endblock %}
   </body>
