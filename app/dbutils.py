@@ -2,10 +2,12 @@ import mysql.connector
 from mysql.connector import errorcode
 import json
 import os
+import nltk
 
 
 class DbAccess(object):
-    """Access database"""
+    """Access database
+    """
     def __init__(self, db_name, usr, pwd=None):
         self.db_name = db_name
         self.cnx = self.connect(usr, pwd)
@@ -49,9 +51,9 @@ class DbGet(DbAccess):
     def get_shows(self):
         """Get all shows in DB, sorted by YT #videos found
         """
-        query = ("SELECT title, year, poster, episodes, ytcount "
+        query = ("SELECT title, year, poster, episodes, ytcount, ytcount/episodes as ytrep "
                  "FROM series "
-                 "ORDER BY ytcount")
+                 "ORDER BY ytrep DESC")
         self.cursor.execute(query)
         return [s for s in self.cursor]
 
@@ -64,15 +66,106 @@ class DbGet(DbAccess):
             WHERE series_title="%s" 
             AND series_year=%s
             ORDER BY season, episode;
-                """ % (show, year))
-        print query
+            """ % (show, year))
+        self.cursor.execute(query)
         return [s for s in self.cursor]
+
+    def check_title(self, show_title):
+        """Check if a show is in the database, allowing for messy entries
+        """
+        lancaster = nltk.LancasterStemmer()
+        show_title_stem = [lancaster.stem(t) \
+            for t in nltk.regexp_tokenize(show_title, r"\w+")]
+        show_title_reg = ''
+        for w in show_title_stem:
+            show_title_reg += '%s%% ' % w
+        query = ("""
+            SELECT title
+            FROM series
+            WHERE TRIM(LOWER(title)) LIKE "%s"
+            LIMIT 1
+            """ % (show_title_reg.strip()))
+        self.cursor.execute(query)
+        data = self.cursor.fetchall()
+        if self.cursor.rowcount > 0:
+            return data[0]
+        else:
+            return
 
 
 class DbPut(DbAccess):
-    """Retrieve data from MySQL DB"""
+    """Retrieve data from MySQL DB
+    """
     def __init__(self):
         with open(os.path.join(os.path.dirname(__file__), 'scrt.json')) as f:
-            usr = json.load(f)['db_write']['usr']
-            pwd = json.load(f)['db_write']['pwd']
-        super(DbGet, self).__init__('couchtube', usr, pwd)
+            dat = json.load(f)
+            usr = dat['db_write']['usr']
+            pwd = dat['db_write']['pwd']
+        super(DbPut, self).__init__('couchtube', usr, pwd)
+
+    def put_show(self, show):
+        """Add a show to the series table
+        """
+        query = ("INSERT INTO series "
+               " (title, episodes, poster, rating, year) "
+               " VALUES (%s, %s, %s, %s, %s) "
+               " ON DUPLICATE KEY UPDATE "
+               "   title=VALUES(title), "
+               "   episodes=VALUES(episodes), "
+               "   rating=VALUES(rating), "
+               "   poster=VALUES(poster), "
+               "   year=VALUES(year) ")
+        params = (
+            show['title'], 
+            show['episodes'], 
+            show['poster'], 
+            show['rating'], 
+            show["year"])
+        self.cursor.execute(query, params)
+        self.cnx.commit()
+
+    def put_episodes(self, show, year, episodes):
+        """Add a show to the series table
+        """
+        query = ("INSERT INTO episodes "
+               " (series_title, series_year, season, episode, title) "
+               " VALUES (%s, %s, %s, %s, %s) "
+               " ON DUPLICATE KEY UPDATE "
+               "   series_title=VALUES(series_title), "
+               "   series_year=VALUES(series_year), "
+               "   episode=VALUES(episode), "
+               "   season=VALUES(season), "
+               "   title=VALUES(title) ")
+        params = [
+            (show, year, 
+            key[0], key[1], 
+            name) for key, name in episodes.items()]
+        self.cursor.executemany(query, params)
+        self.cnx.commit()
+
+    def update_show(self, show, year, field, value):
+        """Update series table with field value
+        """
+        query = ("""
+            UPDATE series
+            SET {}=%s
+            WHERE title=%s AND year=%s;
+            """.format(field))
+        params = (value, show, year)
+        self.cursor.execute(query, params)
+        self.cnx.commit()
+
+    def update_episode(self, show, year, 
+        se_number, ep_number, field, value):
+        """Update episodes table with field value
+        """
+        query = ("""
+            UPDATE episodes
+            SET {}=%s
+            WHERE series_title=%s AND series_year=%s
+                AND episode=%s AND season=%s;
+            """.format(field))
+        params = (value, show, year, 
+            ep_number, se_number)
+        self.cursor.execute(query, params)
+        self.cnx.commit()

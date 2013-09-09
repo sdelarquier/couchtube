@@ -16,9 +16,9 @@
   <!-- Pre-generated links -->
   <div class="well">
     <div class="row" style='text-align: center;'>
-      {% macro thumb(title, year, poster) %}
+      {% macro thumb(title, year, poster, episodes, ytcount) %}
         <div class="col-xs-6 col-sm-4 col-md-2">
-          <a href="watch?show={{ title }}&year={{ year }}" data-toggle="tooltip" data-placement="top" data-original-title="{{ title }} ({{ year }})" class="link-tooltip">
+          <a href="watch?show={{ title }}&year={{ year }}" data-toggle="tooltip" data-placement="top" data-original-title="{{ title }} ({{ year }}) - {{ ytcount }}/{{ episodes }}" class="link-tooltip">
             <div style="position: relative;">
             {% if poster %}
               <img src="{{ poster }}" alt="{{ title }}-{{ year }}" class="img-thumbnail" onError="this.src='static/img/thmb_def.svg';">
@@ -31,7 +31,7 @@
         </div>
       {% endmacro %}
       {% for show in series %}
-        {{ thumb(show[0], show[1], show[2]) }}
+        {{ thumb(show[0], show[1], show[2], show[3], show[4]) }}
       {% endfor %}
     </div>
   </div>
