@@ -28,17 +28,29 @@ class YtQuery(object):
             part="id,snippet",
             maxResults=10,
             type='video'
-            ).execute()
+        ).execute()
         
         return search_response.get("items", [])
+
+    def video(self, id):
+        """Get video info from youtube
+        """
+        vid_response = self.yt_engine.videos().list(
+            part="contentDetails,statistics,status",
+            id=id,
+            maxResults=1
+        ).execute()
+        
+        return vid_response.get("items", [])
 
     def get_episode(self, show_title, 
         ep_title, se_number, ep_number):
         """Finds a youtube video for a given episode
         """
+        print show_title, ep_title, se_number, ep_number
         lancaster = nltk.LancasterStemmer()
         sh_stem = [lancaster.stem(t) \
-                for t in nltk.regexp_tokenize(show_title, r"\w+")]
+            for t in nltk.regexp_tokenize(show_title, r"\w+")]
 
         # Build query
         qlist = (show_title, ep_title, se_number, ep_number)
@@ -87,10 +99,16 @@ class YtQuery(object):
             if score >= 0.4:
                 v['score'] = score
                 v['rel'] = i
+                vid_more = self.video(v['id']['videoId'])
+                v['paid'] = 1 if vid_more[0]['status']['license'] is 'youtube' else 0
+                v['likes'] = int(vid_more[0]['statistics']['likeCount']) - \
+                    int(vid_more[0]['statistics']['dislikeCount'])
+                v['duration'] = vid_more[0]['contentDetails']['duration']
                 vids.append(v)
-                # print '==yt: %s (%s)' % (v["snippet"]["title"], v['score'])
+                print '==yt: %s (%s): %s' % (v["snippet"]["title"], v['score'], v['duration'])
         
         # Return best video if found
         if vids:
-            return sorted(vids, key=lambda el: (el['score'], el['rel']))[-1]
-
+            return sorted(vids, 
+                key=lambda el: (el['score'], el['duration'], 
+                                el['likes'], el['rel']))[-1]

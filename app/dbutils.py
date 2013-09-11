@@ -51,23 +51,27 @@ class DbGet(DbAccess):
     def get_shows(self):
         """Get all shows in DB, sorted by YT #videos found
         """
-        query = ("SELECT title, year, poster, episodes, ytcount, ytcount/episodes as ytrep "
-                 "FROM series "
-                 "ORDER BY ytrep DESC")
+        query = ("""
+            SELECT title, year, poster, episodes, ytcount, 
+                (episodes - ytLicensed)/episodes*100 as ppay, 
+                ytcount/episodes as ytrep
+            FROM series
+            ORDER BY ytrep DESC
+                 """)
         self.cursor.execute(query)
         return [s for s in self.cursor]
 
-    def get_episodes(show, year):
+    def get_episodes(self, show, year):
         """Get all episodes of a given show
         """
         query = ("""
-            SELECT title, episode, season, ytId
+            SELECT title, season, episode, ytId, thumb
             FROM episodes 
-            WHERE series_title="%s" 
-            AND series_year=%s
-            ORDER BY season, episode;
-            """ % (show, year))
-        self.cursor.execute(query)
+            WHERE series_title=%s
+                AND series_year=%s
+            ORDER BY season, episode
+            """)
+        self.cursor.execute(query, (show, year))
         return [s for s in self.cursor]
 
     def check_title(self, show_title):
@@ -82,10 +86,10 @@ class DbGet(DbAccess):
         query = ("""
             SELECT title
             FROM series
-            WHERE TRIM(LOWER(title)) LIKE "%s"
+            WHERE TRIM(LOWER(title)) LIKE %s
             LIMIT 1
-            """ % (show_title_reg.strip()))
-        self.cursor.execute(query)
+            """)
+        self.cursor.execute(query, (show_title_reg.strip()))
         data = self.cursor.fetchall()
         if self.cursor.rowcount > 0:
             return data[0]

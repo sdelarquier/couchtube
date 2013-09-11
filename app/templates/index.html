@@ -16,22 +16,52 @@
   <!-- Pre-generated links -->
   <div class="well">
     <div class="row" style='text-align: center;'>
-      {% macro thumb(title, year, poster, episodes, ytcount) %}
-        <div class="col-xs-6 col-sm-4 col-md-2">
-          <a href="watch?show={{ title }}&year={{ year }}" data-toggle="tooltip" data-placement="top" data-original-title="{{ title }} ({{ year }}) - {{ ytcount }}/{{ episodes }}" class="link-tooltip">
+      {% macro thumb(title, year, poster, episodes, ytcount, ppay) %}
+        <div class="col-xs-6 col-sm-4 col-md-2  link-tooltip" data-toggle="tooltip" data-placement="top" title="{{ title }} ({{ year }})">
+          <a data-toggle="modal" role="button" data-target="#modal-{{ title|replace(' ', '') }}" >
             <div style="position: relative;">
             {% if poster %}
-              <img src="{{ poster }}" alt="{{ title }}-{{ year }}" class="img-thumbnail" onError="this.src='static/img/thmb_def.svg';">
+              <img src="{{ poster }}" alt="{{ title }} ({{ year }})" class="img-thumbnail" onError="this.src='static/img/thmb_def.svg';">
             {%- else -%}
               <img src="static/img/thmb_def.svg" alt="{{ title }}" class="img-thumbnail">
-              <div class="img-over">{{ title }} ({{ year }})</div>
             {%- endif -%}
             </div>
           </a>
+          <!-- Modal -->
+          <div class="modal fade" id="modal-{{ title|replace(' ', '') }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 class="modal-title">{{ title }} ({{ year }})</h4>
+                </div>
+                <div class="modal-body">
+                  <p>
+                    {{ ytcount }} out of {{ episodes }} episodes on YouTube
+                    <!-- [{{ ppay }}% free] -->
+                  </p>
+                  <div class='row'>
+                    <div class="col-md-6 col-md-offset-3">
+                      <a href='watch?nm={{ title }}&yy={{ year }}' id='poster-modal'>
+                        {% if poster %}
+                        <img src="{{ poster }}" alt="{{ title }}-{{ year }}" class="img-thumbnail" onError="this.src='static/img/thmb_def.svg';">
+                        {%- endif -%}  
+                        <span class="play-button icon-stack icon-3x link-tooltip" data-toggle="tooltip" data-placement="top" title="Start watching">
+                          <i class="icon-sign-blank icon-stack-base"></i>
+                          <i class="icon-youtube-play icon-light"></i>
+                        </span>
+                        <!-- <i class="play-button icon-youtube-play icon-4x link-tooltip" data-toggle="tooltip" data-placement="top" title="Start watching"></i> -->
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- /.modal-content -->
+            </div>
+          </div>
         </div>
       {% endmacro %}
       {% for show in series %}
-        {{ thumb(show[0], show[1], show[2], show[3], show[4]) }}
+        {{ thumb(show[0], show[1], show[2], show[3], show[4], show[5]|int()) }}
       {% endfor %}
     </div>
   </div>
@@ -40,8 +70,20 @@
 {% block scripts %}
 <!-- <script src="static/js/typeahead.js"></script> -->
 <script type="text/javascript">
+  $(window).resize(function() {
+    $('.play-button').map(function(){
+      $(this).css({
+        "margin-left": - $(this).outerWidth()/2,
+        "margin-top": - $(this).outerHeight()/2
+      });
+    });
+  });
   $(document).ready(function() {
-    $('.link-tooltip').tooltip()
+    $('.link-tooltip').tooltip();
+    $(window).resize();
+  });
+  $('.modal').on('shown.bs.modal', function () {
+    $(window).resize();
   });
   // // single dataset
   // $('input.typeahead').typeahead({

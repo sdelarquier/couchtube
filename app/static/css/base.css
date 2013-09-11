@@ -1,3 +1,8 @@
+/*
+***************************
+General styling
+***************************
+*/
 body {
   padding-top: 50px;
 }
@@ -16,49 +21,135 @@ body {
   text-align: center;
 }
 
-.links > ul {
-  display: inline-block;
+.modal-backdrop.fade.in {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
 }
 
-.links > ul i {
-  padding-right: 5px;
+/*
+***************************
+Home page
+***************************
+*/
+#poster-modal {
+  position: relative;
 }
 
-.thumbnail > button {
-  max-width: 180px;
-}
-
-.img-over {
-  position: absolute; 
-  top: 0; 
-  bottom: 0; 
-  right: 0;
-  left: 0;
-  text-align: center;
-  vertical-align: middle;
-  font-weight: bold; 
-  font-color: black;
-  display: table-cell;
-}
-
-a .img-over {
+.play-button {
+  color: rgba(50,50,50,.8);
+  position: absolute;
   text-decoration: none;
-  color: black;
+  left: 50%;
+  top: 50%;
 }
 
+.play-button :hover {
+  color: #b22;
+}
+
+/*
+***************************
+Watch page
+***************************
+*/
 #player {
   position: absolute;
   bottom: 0;
   top: 0;
+  left: 0;
+  right: 0;
   width: 100%;
   height: 100%;
   padding-top: 50px;
+}
+
+.player-up {
+  padding-bottom: 160px;
+}
+
+.player-down {
+  padding-bottom: 40px;
 }
 
 .navbar-fixed-bottom {
   background-color: #222222;
   border-color: #080808;
   color: #aaa;
-  min-height: 20px;
-  max-height: 20px;
+  min-height: 40px;
+}
+
+.episode-toggle {
+  padding: 10px;
+  width: 100%;
+}
+
+.episode-toggle:hover {
+  cursor: pointer;
+  color: #b22;
+}
+
+.episode-list {
+  /*position: absolute;*/
+  width: 100%;
+  height: 120px;
+  background-image: url('../img/carbon_fibre.png');
+  background-color: #333;
+  box-shadow: inset 0 3px 6px rgba(10,0,0,.6);
+  text-align: left;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.season-list {
+  margin-left: 25px;
+  height: inherit;
+  display: inline-block;
+}
+
+.season-header {
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  height: inherit;
+  width: 20px;
+  background-color: #222;
+  font-weight: bold;
+  font-size: large;
+  z-index: 110;
+  text-shadow: 0px -1px 0px #668337;
+}
+
+.episode-thumb {
+  display: inline-block;
+  padding-top: 8px;
+}
+
+.episode-video {
+  padding-top: 8px;
+  max-width: 120px;
+  height: 90px;
+  width: auto;
+  background-color: #000;
+}
+
+.caption {
+  background-color: rgba(0,0,0,0.8);
+  position: relative;
+  bottom: 20px;
+  height: 20px;
+  z-index: 100;
+}
+
+/*
+***************************
+Contact page
+***************************
+*/
+.links > ul {
+  display: inline-block;
+}
+
+.links > ul i {
+  padding-right: 5px;
 }

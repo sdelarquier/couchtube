@@ -27,12 +27,14 @@ def contact():
 
 @app.route('/watch')
 def watch():
-    # show = request.args.get('show', '')
-    # year = request.args.get('year', '')
-    # episodes = dbutils.get_episodes(show, year)
-    # vids = ytquery.find_episodes(show, episodes)
-    return render_template("result.html", )
-        # show=show, 
-        # year=year, 
-        # episodes=zip(episodes, vids))
+    show = request.args.get('nm', '')
+    year = request.args.get('yy', '')
+    db = dbutils.DbGet()
+    episodes = db.get_episodes(show, year)
+    db.close()
+    return render_template("result.html", 
+        show=show, 
+        year=year, 
+        episodes=episodes,
+        seasons=set([e[1] for e in episodes]))
     
