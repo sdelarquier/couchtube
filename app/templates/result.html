@@ -3,21 +3,26 @@
   <title>Watch - Couchtube</title>
 {% endblock %}
 {% block content %}
+<!-- episode caption -->
+<div class="pop-left" id="episode-caption">
+</div>
 <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
-<!-- <div class="row"> -->
-    <iframe id="player" class="player-up" type="text/html"
-    src="https://www.youtube.com/embed/{{ episodes[0][3] }}?rel=0&autohide=1&color=red&theme=dark"
-    frameborder="0" allowfullscreen></iframe>
-<!-- </div> -->
+<iframe id="player" data-epn='1' class="player-up" type="text/html"
+src="https://www.youtube.com/embed/{{ episodes[0][3] }}?rel=0&autohide=1&color=red&theme=dark&wmode=transparent"
+frameborder="0" allowfullscreen></iframe>
 <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
-  <div class="episode-toggle" role="button"><i id="updown" class="icon-chevron-sign-down icon-large link-tooltip" data-toggle="tooltip" data-placement="top" title="Episode list"></i></div>
-  <div class="episode-list" id='{{ seasons|length }}'>
+  <button type="button" id="episode-prev" class="btn btn-default btn-sm episode-nav disabled"><i class="icon-chevron-left"></i></button>
+  <span class="episode-toggle" role="button">
+    <i id="updown" class="icon-collapse icon-large link-tooltip" data-toggle="tooltip" data-placement="top" title="Episode list"></i>
+  </span>
+  <button type="button" id="episode-next" class="btn btn-default btn-sm episode-nav"><i class="icon-chevron-right"></i></button>
+  <div class="episode-list" data-seasons='{{ seasons|length }}' data-episodes='{{ episodes|length }}'>
     {% for s in seasons %}
       <span id='{{ s }}-season' class="season-list">
-        <span class="season-header" id='{{ s }}'>{{ s }}</span>
+        <span class="season-header" id='s{{ s }}'>{{ s }}</span>
         {% for ep in episodes %}
           {% if ep[1] == s %}
-            <span id="S{{ ep[1] }}-E{{ ep[2] }}" class="episode-thumb" data-id="{{ ep[3] }}">
+            <span id="{{ loop.index }}" class="episode-thumb" data-id="{{ ep[3] }}" data-epn="{{ loop.index }}" data-ep-name="S{{ ep[1] }}-E{{ ep[2] }}: {{ ep[0] }}">
               <img src="{{ ep[4] }}" class="episode-video" onError="this.src='static/img/thmb_def-w.svg';">
               <div class="caption">S{{ ep[1] }}-E{{ ep[2] }}</div>
             </span>
@@ -34,27 +39,32 @@
   $(document).ready(function() {
     // Document loaded
     $("body").toggleClass('dark');
+    $("#1").toggleClass('episode-active');
     $('.link-tooltip').tooltip();
+    $('#episode-caption').hide();
     $('.episode-toggle').click( function() {
       $(this).parent().find(".episode-list").slideToggle('fast', function() {
-        $(this).parent().find("#updown").toggleClass('icon-chevron-sign-down');
-        $(this).parent().find("#updown").toggleClass('icon-chevron-sign-up');
+        $(this).parent().find("#updown").toggleClass('icon-collapse');
+        $(this).parent().find("#updown").toggleClass('icon-collapse-top');
         $("#player").toggleClass('player-up');
         $("#player").toggleClass('player-down');
       });
     });
+    // Resize function
+    $(window).resize(function() {
+      $('.episode-list').scroll();
+    });
     // Scroll to season
     $('.season-header').click(function() {
-      var se = parseInt($(this).attr('id'),10);
+      var se = parseInt($(this).attr('id').substr(1),10);
       var pos = $('#'+se+'-season').position().left;
       var cpos = $('.episode-list').scrollLeft();
-      console.log(se, pos);
       $('.episode-list').animate({scrollLeft: cpos+pos-(se-1)*20}, 'fast');
     });
     // Place season headers
     $('.season-header').each( function() {
-      var se = parseInt($(this).attr('id'),10);
-      var ns = parseInt($('.episode-list').attr('id'),10);
+      var se = parseInt($(this).attr('id').substr(1),10);
+      var ns = parseInt($('.episode-list').attr('data-seasons'),10);
       var pos = 0;
       if(se > 1) {
         pos = $('.episode-list').outerWidth() - 20*(ns-se+1);
@@ -62,31 +72,86 @@
       $(this).css('position', 'fixed');
       $(this).css('left', pos+"px");
     });
-    // Switch episode
+    // Go to episode
     $('.episode-video').click( function() {
+      var prev_ind = parseInt($('.episode-active').attr('id'),10);
       var vidId = $(this).parent().attr("data-id");
-      $('#player').attr('src',"https://www.youtube.com/embed/"+vidId+"?rel=0&autohide=1&color=red&theme=dark");
+      var ind = parseInt($(this).parent().attr("data-epn"),10);
+      playThis(vidId, ind, prev_ind);
+    });
+    // Go to next episode
+    $('#episode-next').click( function() {
+      var nep = parseInt($('.episode-list').attr('data-episodes'),10);
+      var ind = parseInt($('#player').attr("data-epn"),10) + 1;
+      if(ind <= nep) {
+        var vidId = $('#'+ind).attr("data-id");
+        playThis(vidId, ind, ind-1);
+      }
+    });
+    // Go to previous episode
+    $('#episode-prev').click( function() {
+      var nep = parseInt($('.episode-list').attr('data-episodes'),10);
+      var ind = parseInt($('#player').attr("data-epn"),10) - 1;
+      if(ind >= 1) {
+        var vidId = $('#'+ind).attr("data-id");
+        playThis(vidId, ind, ind+1);
+      }
     });
     // Track episode scrolling
     $('.episode-list').scroll( function() {
       $('.season-header').each( function() {
-        var se = parseInt($(this).attr('id'),10);
-        var ns = parseInt($('.episode-list').attr('id'),10);
+        var se = parseInt($(this).attr('id').substr(1),10);
+        var ns = parseInt($('.episode-list').attr('data-seasons'),10);
         var pos = $('#'+se+'-season').position().left;
         var left_lim = (se-1)*20;
         var right_lim = $('.episode-list').outerWidth() - 20*(ns-se+1);
         if(pos <= left_lim) {
-          $(this).css('position', 'fixed');
+          // $(this).css('position', 'fixed');
           $(this).css('left', left_lim+"px");
         } else if(pos >= right_lim) {
-          $(this).css('position', 'fixed');
+          // $(this).css('position', 'fixed');
           $(this).css('left', right_lim+"px");
         } else {
-          // $(this).css('left', pos+"px");
-          $(this).css('position', 'static');
+          $(this).css('left', pos+"px");
+          // $(this).css('position', 'static');
         }
       });
     });
+    // Force closed caption
+    $('.pop-left').click(function() {
+      $('#episode-caption').stop(true);
+      $('#episode-caption').animate({'width': 'toggle'}, 'fast', function() {
+        $(this).text('');
+      });
+    });
+    // player loaded
+    $('#player').load(function() {
+      var ind = parseInt($('#player').attr("data-epn"),10);
+      var caption =  '<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove-sign"></i></button>';
+      caption += $('#'+ind).attr('data-ep-name');
+      $('#episode-caption').html(caption);
+      $('#episode-caption').fadeIn().delay(5000).animate({'width': 'toggle'}, 'fast', function() {
+        $(this).text('');
+      });
+    });
   });
+  function playThis(vidId, ind, prev_ind) {
+    var nep = parseInt($('.episode-list').attr('data-episodes'),10);
+    if(prev_ind == nep) { 
+      $('#episode-next').removeClass('disabled')
+    } else if(prev_ind == 1) {
+      $('#episode-prev').removeClass('disabled')
+    }
+    if(ind == nep) { 
+      $('#episode-next').addClass('disabled')
+    } else if(ind == 1) {
+      $('#episode-prev').addClass('disabled')
+    }
+    $('#episode-caption').stop(true);
+    $('#player').attr('src',"https://www.youtube.com/embed/"+vidId+"?rel=0&autohide=1&color=red&theme=dark&wmode=transparent");
+    $('#player').attr('data-epn', ind);
+    $("#"+prev_ind).toggleClass('episode-active');
+    $("#"+ind).toggleClass('episode-active');
+  }
 </script>
 {% endblock %}

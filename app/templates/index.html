@@ -1,18 +1,26 @@
 {% extends "base.html" %}
 {% block head %}
     <title>CouchTube</title>
+    <link href="static/css/typeahead.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
+<div class='top-search'>
+<div class='container-search'>
+  <!-- <div class="row"> -->
+    <!-- <div class="col-md-8 col-md-offset-2"> -->
+      <!-- <div class="input-group movies" style="margin: 0 5% 5% 5%;"> -->
+        <!-- <span class="input-group-addon"><i class="icon-search"></i></span> -->
+        <div class="input-show">
+          <input id="show-typeahead" class="typeahead" type="text" placeholder="TV show title">
+        </div>
+        <button type='button' class='btn btn-default search-button'><i class="icon-search icon-large"></i></button>
+      <!-- </div> -->
+    <!-- </div> -->
+  <!-- </div> -->
+</div>
+</div>
+<div class="row" id='search-well'>
 <div class="col-md-10 col-md-offset-1">
-  <!-- Input search -->
-  <div class="row">
-    <div class="col-md-8 col-md-offset-2">
-      <div class="input-group movies" style="margin: 0 5% 5% 5%;">
-        <span class="input-group-addon"><i class="icon-search"></i></span>
-        <input type="text" class="typeahead form-control" placeholder="TV show title (not yet working)">
-      </div>
-    </div>
-  </div>
   <!-- Pre-generated links -->
   <div class="well">
     <div class="row" style='text-align: center;'>
@@ -44,7 +52,7 @@
                     <div class="col-md-6 col-md-offset-3">
                       <a href='watch?nm={{ title }}&yy={{ year }}' id='poster-modal'>
                         {% if poster %}
-                        <img src="{{ poster }}" alt="{{ title }}-{{ year }}" class="img-thumbnail" onError="this.src='static/img/thmb_def.svg';">
+                        <img src="{{ poster }}" alt="{{ title }}-{{ year }}" class="img-thumbnail show-poster" onError="this.src='static/img/thmb_def.svg';">
                         {%- endif -%}  
                         <span class="play-button icon-stack icon-3x link-tooltip" data-toggle="tooltip" data-placement="top" title="Start watching">
                           <i class="icon-sign-blank icon-stack-base"></i>
@@ -57,7 +65,7 @@
                 </div>
               </div><!-- /.modal-content -->
             </div>
-          </div>
+          </div><!-- /.modal -->
         </div>
       {% endmacro %}
       {% for show in series %}
@@ -66,9 +74,38 @@
     </div>
   </div>
 </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="modal-alert" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-alert">
+    <div class="modal-content">
+<!--       <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title"></h4>
+      </div> -->
+      <div class="modal-body">
+        <p>You've managed to find a show I don't know... Good for you!</p><p>Woud you like me to look for <span id='alert-show-title' style='font-weight: bold;'></span> on the web?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+        <button type="button" class="btn btn-primary" id='find-my-show'>Find it</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div>
+</div><!-- /.modal -->
+<!-- Modal -->
+<div class="modal fade" id="modal-search" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+      </div>
+    </div><!-- /.modal-content -->
+  </div>
+</div><!-- /.modal -->
 {% endblock %}
 {% block scripts %}
-<!-- <script src="static/js/typeahead.js"></script> -->
+<script src="static/js/hogan-2.0.0.js"></script>
+<script src="static/js/typeahead.js"></script>
 <script type="text/javascript">
   $(window).resize(function() {
     $('.play-button').map(function(){
@@ -77,18 +114,95 @@
         "margin-top": - $(this).outerHeight()/2
       });
     });
+    $(".show-poster")
+    $(".show-poster").each(function() {
+      $(this).css('max-height', 0.6*$(window).height());
+    });
   });
   $(document).ready(function() {
     $('.link-tooltip').tooltip();
     $(window).resize();
+    // Search typeahead
+    $('#show-typeahead').typeahead({
+      name: 'tv-shows',
+      valueKey: 'title',
+      prefetch: 'static/data/shows.json',                                    
+      // template: [
+      //   '<p class="show-title">{{title}}</p>',                              
+      //   '<p class="show-stats">{{ytcount}}/{{episodes}}</p>'                       
+      // ].join(''),
+      // engine: Hogan                                                               
+    });
+    // Size the search box
+    $('.input-show').find('*').each( function() {
+      $(this).css('box-sizing','content-box')
+    });
+    // Search send
+    $('#show-typeahead').keypress(function (e) {
+      if (e.which == 13) {
+        var show = $(this).val();
+        getShow(show);
+        return false;
+      }
+    });
+    $('.search-button').click(function() {
+      var show = $(this).parent().find('#show-typeahead').val();
+      getShow(show);
+    });
+    // Start show finder engine
+    $('#find-my-show').click(function() {
+      $('#modal-alert').modal('hide');
+      var show = $('#show-typeahead').val();
+      $('#modal-search').find('.modal-body').html('<img src="static/img/ajax-loader.gif">')
+      $.get("/findShow?title="+show, function(data) {
+        // console.log(data);
+        $('#modal-search').find('.modal-body').html('');
+        var out = "";
+        if (data != 'None') {
+          out += "<p>Is this the show you are looking for?</p>";
+          out += "<p><b><span id='search-results'>"+data.Series.SeriesName+"</span> ("+data.Series.FirstAired.substr(0,4)+")</b></p>";
+          if (data.Series.banner) {
+            out += "<img class='img-thumbnail' src='http://thetvdb.com/banners/"+data.Series.banner+"'>";
+          }
+          out += '<p></p>';
+          out += '<div><button type="button" class="btn btn-primary" id="yt-get-show">Yes, get it!</button></div>';
+        } else {
+          out += "<p>Sorry, I could not find your show...</p>";
+        }
+        $('#modal-search').find('.modal-body').html(out);
+        // Start show loader engine
+        $('#yt-get-show').click(function() {
+          var show = $('#modal-search').find('#search-results').text();
+          console.log('Get show ', show)
+          var container = $('#modal-search').find('#I-have-too-many-ids');
+          container.html('<div>This may take a while (1-2 minutes)</div><img src="static/img/ajax-loader.gif">');
+          $.get("/ingestData?title="+show, function(data) {
+            container.html('<div>Your show is ready: '+data.ytcount+' out of '+data.episodes+' episodes found.</div><a role="button" class="btn btn-primary" href="/watch?nm='+data.title+'&yy='+data.year+'">Start watching</a>');
+          });
+        });
+        $('#modal-search').modal('show');
+      });
+    });
   });
-  $('.modal').on('shown.bs.modal', function () {
-    $(window).resize();
-  });
-  // // single dataset
-  // $('input.typeahead').typeahead({
-  //   name: 'tv-shows',
-  //   local: ["Grand Designs", "Top Gear"]
+  // $('.modal').on('shown.bs.modal', function () {
+  //   $(window).resize();
   // });
+  function getShow(show) {
+    // console.log(show);
+    $.getJSON('static/data/shows.json', function(data) {
+      var found = false;
+      $.each(data, function(ind, val) {
+        // console.log(ind, val);
+        if (val['title']==show) {
+          found = true;
+          $('#modal-'+show.replace(/ /g, "")).modal('show');
+        }
+      });
+      if (found == false) {
+        $('#modal-alert').find('.modal-body').find('#alert-show-title').html(show);
+        $('#modal-alert').modal('show');
+      }
+    });
+  };
 </script>
 {% endblock %}

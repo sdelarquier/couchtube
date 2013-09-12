@@ -7,6 +7,10 @@ body {
   padding-top: 50px;
 }
 
+.nav > .active {
+  text-shadow: 0 0 0.2em #b22, 0 0 0.2em #b22, 0 0 0.2em #b22;
+}
+
 .dark {
     background-image: url("../img/stressed_linen.png");
 }
@@ -31,6 +35,29 @@ body {
 Home page
 ***************************
 */
+.top-search {
+  position: fixed;
+  top: 50px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  /*padding: 10px;*/
+  border-bottom: 1px solid #aaa;
+  box-shadow: 0 3px 8px rgba(0,0,0,.4);
+  z-index: 100;
+  background-color: rgba(255,255,255,.9);
+  /*-webkit-filter: blur(2px);*/
+}
+
+.search-button {
+  vertical-align: middle;
+  display: inline-block;
+}
+
+#search-well {
+  margin-top: 50px;
+}
+
 #poster-modal {
   position: relative;
 }
@@ -45,6 +72,15 @@ Home page
 
 .play-button :hover {
   color: #b22;
+}
+
+.show-title {
+  font-weight: bold;
+}
+
+.show-stats {
+  float: right;
+  color: #555;
 }
 
 /*
@@ -64,11 +100,40 @@ Watch page
 }
 
 .player-up {
-  padding-bottom: 160px;
+  padding-bottom: 150px;
 }
 
 .player-down {
   padding-bottom: 40px;
+}
+
+.pop-left {
+  position: absolute;
+  left: 0;
+  bottom: 160px;
+  max-width: 90%;
+  padding: 5px 10px;
+  /*background-image: url('../img/carbon_fibre.png');*/
+  background-color: #111;
+  border: 1px solid #555;
+  border-left: none;
+  box-shadow: 3px 3px 8px rgba(100,100,100,.6);
+  z-index: 100;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  color: #eee;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 125%;
+/*  width: 90%;
+  height: 50px;*/
+}
+
+.pop-left > button {
+  padding-left: 10px;
+  display: inline-block;
+  vertical-align: middle;
+  color: white;
 }
 
 .navbar-fixed-bottom {
@@ -79,19 +144,39 @@ Watch page
 }
 
 .episode-toggle {
-  padding: 10px;
-  width: 100%;
+  /*padding: 10px;*/
+  /*width: 100%;*/
+  height: 40px;
+  line-height: 40px;
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  text-shadow: none;
 }
 
 .episode-toggle:hover {
   cursor: pointer;
-  color: #b22;
+  /*color: #b22;*/
+  text-shadow: 0 0 0.2em #b22, 0 0 0.2em #b22, 0 0 0.2em #b22;
+}
+
+.episode-nav {
+  display: inline-block;
+  margin: 5px;
+}
+
+#episode-prev {
+  float: left;
+}
+
+#episode-next {
+  float: right;
 }
 
 .episode-list {
   /*position: absolute;*/
   width: 100%;
-  height: 120px;
+  height: 110px;
   background-image: url('../img/carbon_fibre.png');
   background-color: #333;
   box-shadow: inset 0 3px 6px rgba(10,0,0,.6);
@@ -108,6 +193,7 @@ Watch page
 }
 
 .season-header {
+  position: fixed;
   display: inline-block;
   vertical-align: middle;
   text-align: center;
@@ -118,6 +204,8 @@ Watch page
   font-size: large;
   z-index: 110;
   text-shadow: 0px -1px 0px #668337;
+  border-right: 1px solid #111;
+  cursor: pointer;
 }
 
 .episode-thumb {
@@ -131,6 +219,11 @@ Watch page
   height: 90px;
   width: auto;
   background-color: #000;
+}
+
+.episode-active {
+  border: 1px solid red;
+  background: rgba(255,0,0,.5);
 }
 
 .caption {

@@ -47,7 +47,7 @@ class YtQuery(object):
         ep_title, se_number, ep_number):
         """Finds a youtube video for a given episode
         """
-        print show_title, ep_title, se_number, ep_number
+        # print show_title, ep_title, se_number, ep_number
         lancaster = nltk.LancasterStemmer()
         sh_stem = [lancaster.stem(t) \
             for t in nltk.regexp_tokenize(show_title, r"\w+")]
@@ -105,7 +105,7 @@ class YtQuery(object):
                     int(vid_more[0]['statistics']['dislikeCount'])
                 v['duration'] = vid_more[0]['contentDetails']['duration']
                 vids.append(v)
-                print '==yt: %s (%s): %s' % (v["snippet"]["title"], v['score'], v['duration'])
+                # print '==yt: %s (%s): %s' % (v["snippet"]["title"], v['score'], v['duration'])
         
         # Return best video if found
         if vids:
