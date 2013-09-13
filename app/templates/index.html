@@ -45,10 +45,18 @@
                 <h4 class="modal-title">{{ title }} ({{ year }})</h4>
               </div>
               <div class="modal-body">
-                <p>
-                  {{ ytcount }} out of {{ episodes }} episodes on YouTube
-                  [{{ ppay }}% free]
-                </p>
+                <div class="row">
+                  <div class="col-md-6 col-md-offset-3" style="text-align: left;">
+                    <div class="progress">
+                      <div class="progress-bar progress-bar-grey" role="progressbar" aria-valuenow="{{ ytcount/episodes*100 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ ytcount/episodes*100 }}%"></div>
+                      <span class='progress-title'>Episodes</span><span class="pull-right">{{ ytcount }} / {{ episodes }}</span>
+                    </div>
+                    <div class="progress">
+                      <div class="progress-bar progress-bar-grey" role="progressbar" aria-valuenow="{{ ppay }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ ppay }}%"></div>
+                      <span class='progress-title'>Free content</span><span class="pull-right">{{ ppay }}%</span>
+                    </div>
+                  </div>
+                </div>
                 <div class='row'>
                   <div class="col-md-6 col-md-offset-3">
                     <a href='watch?nm={{ title }}&yy={{ year }}' id='poster-modal'>

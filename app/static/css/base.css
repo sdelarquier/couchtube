@@ -39,6 +39,33 @@ body {
   z-index: 3000;
 }
 
+.progress {
+  position: relative;
+  background-color: #777;
+}
+
+.progress-bar-grey {
+  background-color: #200;
+}
+
+.progress-title,
+.pull-right {
+  color: white;
+}
+
+.progress-title {
+  position: absolute;
+  top: 0;
+  left: 5px;
+}
+
+.pull-right {
+  position: absolute;
+  top: 0;
+  right: 5px;
+}
+
+
 /*
 ***************************
 Home page
