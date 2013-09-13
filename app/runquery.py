@@ -53,7 +53,7 @@ def run_query(title, cache=False):
     show['ytcount'] = vid_count
     put.update_show(show['title'], show['year'], 'ytcount', vid_count)
     put.update_show(show['title'], show['year'], 'ytLicensed', paid_count)
-    print '    Completed YouTube search and update'
+    print '    Completed YouTube search and update: %s of %s episodes found' % (vid_count, len(episodes))
 
     # Close DB access
     put.close()

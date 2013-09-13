@@ -39,23 +39,39 @@ class YtQuery(object):
         """Get video info from youtube
         """
         vid_response = self.yt_engine.videos().list(
-            part="contentDetails,statistics,status",
+            part="contentDetails,statistics,snippet",
             id=id,
             maxResults=1
         ).execute()
         
         return vid_response.get("items", [])
 
+    def category(self, id):
+        """Get category info from youtube
+        """
+        cat_response = self.yt_engine.videoCategories().list(
+            part="snippet",
+            id=id,
+            # maxResults=1
+        ).execute()
+        
+        return cat_response.get("items", [])
+
     def get_episode(self, show_title, 
         ep_title, se_number, ep_number, runtime):
         """Finds a youtube video for a given episode
-Each video is scored first:
-- [0-2]: the show name is in the video name
+Videos too short are exculded
+Videos with negative likes are excluded
+Each video is scored:
+- [0-1]: the show name is in the video name
 - [0-1]: the episode title is in the video name
 - [0-0.5]: the season number is in the video name
 - [0-0.5]: the episode number is in the video name
+- [0-0.4]: paid content
         """
-        # print show_title, ep_title, se_number, ep_number
+        from apiclient import errors
+
+        # print '\n', show_title, ep_title, se_number, ep_number
         lancaster = nltk.LancasterStemmer()
         sh_stem = [lancaster.stem(t) \
             for t in nltk.regexp_tokenize(show_title.encode('utf8'), r"\w+")]
@@ -79,8 +95,23 @@ Each video is scored first:
         # Parse and score results
         vids = []
         for i,v in enumerate(res):
+            # Get more details about the video
+            vid_more = self.video(v['id']['videoId'])[0]
+
+            # Video duration filter (some parsing recquired)
+            dur_str = vid_more['contentDetails']['duration'].encode('utf8')
+            v['duration'] = self._parse_time(dur_str)
+            if not (1.1 > v['duration']*1./runtime > .5):
+                continue
+
+            # Reject videos with negative likes
+            v['likes'] = int(vid_more['statistics']['likeCount'].encode('utf8')) - \
+                int(vid_more['statistics']['dislikeCount'].encode('utf8'))
+            if v['likes'] < 0:
+                continue
+
             # Init score
-            scores = [0]*4
+            scores = [0]*5
 
             # Fix encoding problems
             title = v["snippet"]["title"].encode('utf8')
@@ -119,35 +150,46 @@ Each video is scored first:
                 if stem:
                     scores[1] = len(set(ep_stem) & set(stem))*1./len(set(stem))
 
+            # Guess if official show (and get a bonus)
+            try:
+                cat = self.category(vid_more["snippet"]["categoryId"])[0]
+                cat_title = cat["snippet"]["title"].encode('utf8')
+                if cat_title == 'Shows':
+                    scores[0] = 1
+            except errors.HttpError:
+                pass
+
+            # Find out if paid content (bonus if it is)
+            v['paid'] = 1 if len(vid_more['contentDetails']['contentRating'])>1 else 0
+            if v['paid'] == 1:
+                scores[4] = .4
+
             # Total score and append if good enough
             v['score'] = sum(scores)
-            # print '======%s: %s (%s): ' % (i, v["snippet"]["title"], v['score'])
-            if v['score'] >= 1.55:
-                # Get more details about the video
-                vid_more = self.video(v['id']['videoId'])[0]
-                # Find out if paid content
-                v['paid'] = 1 if len(vid_more['contentDetails']['contentRating'])>1 else 0
-                if v['paid'] == 1:
-                    v['score'] += 10
-                # Likes
-                v['likes'] = int(vid_more['statistics']['likeCount'].encode('utf8')) - \
-                    int(vid_more['statistics']['dislikeCount'].encode('utf8'))
-                # Duration
-                dur_str = vid_more['contentDetails']['duration'].encode('utf8')
-                hr = re.findall('(?<=PT)[0-9]{0,2}(?=H)', dur_str)
-                mn = re.findall('(?<=PT)[0-9]{0,2}(?=M)|(?<=H)[0-9]{0,2}(?=M)', dur_str)
-                sc = re.findall('(?<=PT)[0-9]{0,2}(?=S)|(?<=M)[0-9]{0,2}(?=S)', dur_str)
-                v['duration'] = 0
-                v['duration'] += 0 if not hr else 60*int(hr[0])
-                v['duration'] += 0 if not mn else int(mn[0])
-                v['duration'] += 0 if not sc else int(sc[0])/60.
-                if 1. > v['duration']*1./runtime > .5:
-                    vids.append(v)
-                    # print '====yt: %s / %s (%s) (%s paid)' % (v['duration'], 
-                    #     runtime, v['duration']*1./runtime, v['paid'])
-                    # print '====yt', vid_more['contentDetails']['contentRating']
+            # print scores
+            # print '======%s: %s (%s)' % (i, v["snippet"]["title"], v['score'])
+            if v['score'] >= 1.85:
+                # print '====yt: %s / %s (%s) (%s paid)' % (v['duration'], 
+                #     runtime, v['duration']*1./runtime, v['paid'])
+                vids.append(v)
 
         # Return best video if found
         if vids:
-            return sorted(vids, 
+            vid_select = sorted(vids, 
                 key=lambda el: (el['score'], el['likes']))[-1]
+            print '########%s: %s (%s)' % (i, 
+                vid_select["snippet"]["title"], vid_select['score']) 
+            return vid_select
+
+    def _parse_time(self, time_str):
+        """parses the video duration parameter into minutes
+        """
+        hr = re.findall('(?<=PT)[0-9]{0,2}(?=H)', time_str)
+        mn = re.findall('(?<=PT)[0-9]{0,2}(?=M)|(?<=H)[0-9]{0,2}(?=M)', time_str)
+        sc = re.findall('(?<=PT)[0-9]{0,2}(?=S)|(?<=M)[0-9]{0,2}(?=S)', time_str)
+        dur_min = 0
+        dur_min += 0 if not hr else 60*int(hr[0])
+        dur_min += 0 if not mn else int(mn[0])
+        dur_min += 0 if not sc else int(sc[0])/60.
+
+        return dur_min
