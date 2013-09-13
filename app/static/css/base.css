@@ -26,8 +26,17 @@ body {
 }
 
 .modal-backdrop.fade.in {
-  opacity: 0.5;
+  opacity: 0.6;
   filter: alpha(opacity=50);
+  z-index: 2500;
+}
+
+.navbar {
+  z-index: 2000;
+}
+
+.modal {
+  z-index: 3000;
 }
 
 /*
@@ -44,7 +53,7 @@ Home page
   /*padding: 10px;*/
   border-bottom: 1px solid #aaa;
   box-shadow: 0 3px 8px rgba(0,0,0,.4);
-  z-index: 100;
+  z-index: 2000;
   background-color: rgba(255,255,255,.9);
   /*-webkit-filter: blur(2px);*/
 }

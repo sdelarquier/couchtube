@@ -25,48 +25,48 @@
   <div class="well">
     <div class="row" style='text-align: center;'>
       {% macro thumb(title, year, poster, episodes, ytcount, ppay) %}
-        <div class="col-xs-6 col-sm-4 col-md-2  link-tooltip" data-toggle="tooltip" data-placement="top" title="{{ title }} ({{ year }})">
+        <div class="col-xs-6 col-sm-4 col-md-3 link-tooltip show-list-elem" data-toggle="tooltip" data-placement="top" title="{{ title }} ({{ year }})">
           <a data-toggle="modal" role="button" data-target="#modal-{{ title|replace(' ', '') }}" >
             <div style="position: relative;">
             {% if poster %}
-              <img src="{{ poster }}" alt="{{ title }} ({{ year }})" class="img-thumbnail" onError="this.src='static/img/thmb_def.svg';">
+              <img src="{{ poster }}" alt="{{ title }} ({{ year }})" class="img-thumbnail show-poster-list" onError="this.src='static/img/thmb_def.svg';">
             {%- else -%}
               <img src="static/img/thmb_def.svg" alt="{{ title }}" class="img-thumbnail">
             {%- endif -%}
             </div>
           </a>
-          <!-- Modal -->
-          <div class="modal fade" id="modal-{{ title|replace(' ', '') }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title">{{ title }} ({{ year }})</h4>
-                </div>
-                <div class="modal-body">
-                  <p>
-                    {{ ytcount }} out of {{ episodes }} episodes on YouTube
-                    <!-- [{{ ppay }}% free] -->
-                  </p>
-                  <div class='row'>
-                    <div class="col-md-6 col-md-offset-3">
-                      <a href='watch?nm={{ title }}&yy={{ year }}' id='poster-modal'>
-                        {% if poster %}
-                        <img src="{{ poster }}" alt="{{ title }}-{{ year }}" class="img-thumbnail show-poster" onError="this.src='static/img/thmb_def.svg';">
-                        {%- endif -%}  
-                        <span class="play-button icon-stack icon-3x link-tooltip" data-toggle="tooltip" data-placement="top" title="Start watching">
-                          <i class="icon-sign-blank icon-stack-base"></i>
-                          <i class="icon-youtube-play icon-light"></i>
-                        </span>
-                        <!-- <i class="play-button icon-youtube-play icon-4x link-tooltip" data-toggle="tooltip" data-placement="top" title="Start watching"></i> -->
-                      </a>
-                    </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="modal-{{ title|replace(' ', '') }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">{{ title }} ({{ year }})</h4>
+              </div>
+              <div class="modal-body">
+                <p>
+                  {{ ytcount }} out of {{ episodes }} episodes on YouTube
+                  [{{ ppay }}% free]
+                </p>
+                <div class='row'>
+                  <div class="col-md-6 col-md-offset-3">
+                    <a href='watch?nm={{ title }}&yy={{ year }}' id='poster-modal'>
+                      {% if poster %}
+                      <img src="{{ poster }}" alt="{{ title }}-{{ year }}" class="img-thumbnail show-poster" onError="this.src='static/img/thmb_def.svg';">
+                      {%- endif -%}  
+                      <span class="play-button icon-stack icon-3x link-tooltip" data-toggle="tooltip" data-placement="top" title="Start watching">
+                        <i class="icon-sign-blank icon-stack-base"></i>
+                        <i class="icon-youtube-play icon-light"></i>
+                      </span>
+                      <!-- <i class="play-button icon-youtube-play icon-4x link-tooltip" data-toggle="tooltip" data-placement="top" title="Start watching"></i> -->
+                    </a>
                   </div>
                 </div>
-              </div><!-- /.modal-content -->
-            </div>
-          </div><!-- /.modal -->
-        </div>
+              </div>
+            </div><!-- /.modal-content -->
+          </div>
+        </div><!-- /.modal -->
       {% endmacro %}
       {% for show in series %}
         {{ thumb(show[0], show[1], show[2], show[3], show[4], show[5]|int()) }}
@@ -118,6 +118,9 @@
     $(".show-poster").each(function() {
       $(this).css('max-height', 0.6*$(window).height());
     });
+    $('.show-poster-list').each(function() {
+      $(this).css('width', $(this).parents('.show-list-elem').width());
+    });
   });
   $(document).ready(function() {
     $('.link-tooltip').tooltip();
@@ -165,7 +168,7 @@
             out += "<img class='img-thumbnail' src='http://thetvdb.com/banners/"+data.Series.banner+"'>";
           }
           out += '<p></p>';
-          out += '<div><button type="button" class="btn btn-primary" id="yt-get-show">Yes, get it!</button></div>';
+          out += '<div id="I-have-too-many-ids"><button type="button" class="btn btn-primary" id="yt-get-show">Yes, get it!</button></div>';
         } else {
           out += "<p>Sorry, I could not find your show...</p>";
         }
@@ -174,10 +177,9 @@
         $('#yt-get-show').click(function() {
           var show = $('#modal-search').find('#search-results').text();
           console.log('Get show ', show)
-          var container = $('#modal-search').find('#I-have-too-many-ids');
-          container.html('<div>This may take a while (1-2 minutes)</div><img src="static/img/ajax-loader.gif">');
+          $('#I-have-too-many-ids').html('<div>This may take a while (1-2 minutes)</div><img src="static/img/ajax-loader.gif">');
           $.get("/ingestData?title="+show, function(data) {
-            container.html('<div>Your show is ready: '+data.ytcount+' out of '+data.episodes+' episodes found.</div><a role="button" class="btn btn-primary" href="/watch?nm='+data.title+'&yy='+data.year+'">Start watching</a>');
+            $('#I-have-too-many-ids').html('<div>Your show is ready: '+data.ytcount+' out of '+data.episodes+' episodes found.</div><a role="button" class="btn btn-primary" href="/watch?nm='+data.title+'&yy='+data.year+'">Start watching</a>');
           });
         });
         $('#modal-search').modal('show');

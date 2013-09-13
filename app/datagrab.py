@@ -41,7 +41,7 @@ This tends to be a bit flaky (their server drops out everyday)
             "type": "json",
             "plot": "simple",
             "episode": 1,
-            "limit": 3,
+            "limit": 5,
             "yg": 0,
             "lang": "en-US",
             "offset": "",
@@ -52,15 +52,24 @@ This tends to be a bit flaky (their server drops out everyday)
         # Get query results
         tmp = self.get_from_api(url, params=query)
         self.imdb = None
+        if 'code' in tmp and tmp['code'] == 404:
+            return
         if tmp is not None and tmp:
             for res in tmp:
                 if self.show_title != res['title']: continue
+                if 'episodes' not in res: continue
                 self.imdb = {}
-                self.imdb['poster'] = res['poster']['imdb']
+                if 'poster' in res and 'imdb' in res['poster']:
+                    self.imdb['poster'] = res['poster']['imdb']
+                else:
+                    self.imdb['poster'] = None
                 self.imdb['year'] = res['year']
                 self.imdb['rating'] = res['rating']
                 self.imdb['Episodes'] = {}
                 for ep in res['episodes']:
+                    if 'season' not in ep or \
+                    'episode' not in ep:
+                        continue
                     key = (ep['season'], \
                         ep['episode'])
                     self.imdb['Episodes'][key] = ep
@@ -179,7 +188,8 @@ class DataMerge(DataGrab):
             'episodes': None, 
             'poster': None, 
             'rating': None, 
-            'ytcount': None}
+            'ytcount': None,
+            'runtime': None}
         # Merge show info 
         # (all except yt video count and episode number)
         test = lambda src, key: src and self.show[key] is None
@@ -223,6 +233,12 @@ class DataMerge(DataGrab):
         if test(self.loaded['imdb'], 'poster'):
             try:
                 self.show['rating'] = self.imdb['rating']
+            except Exception: 
+                pass
+        # Then runtime (tvdb only)
+        if test(self.loaded['tvdb'], 'runtime'):
+            try:
+                self.show['runtime'] = int(self.tvdb['Series']['Runtime'])
             except Exception: 
                 pass
 

@@ -54,7 +54,8 @@ class DbGet(DbAccess):
         query = ("""
             SELECT title, year, poster, episodes, ytcount, 
                 (episodes - ytLicensed)/episodes*100 as ppay, 
-                ytcount/episodes as ytrep
+                ytcount/episodes as ytrep, 
+                runtime
             FROM series
             ORDER BY ytrep DESC
                  """)
@@ -111,20 +112,22 @@ class DbPut(DbAccess):
         """Add a show to the series table
         """
         query = ("INSERT INTO series "
-               " (title, episodes, poster, rating, year) "
-               " VALUES (%s, %s, %s, %s, %s) "
+               " (title, episodes, poster, rating, year, runtime) "
+               " VALUES (%s, %s, %s, %s, %s, %s) "
                " ON DUPLICATE KEY UPDATE "
                "   title=VALUES(title), "
                "   episodes=VALUES(episodes), "
                "   rating=VALUES(rating), "
                "   poster=VALUES(poster), "
-               "   year=VALUES(year) ")
+               "   year=VALUES(year), "
+               "   runtime=VALUES(runtime) ")
         params = (
             show['title'], 
             show['episodes'], 
             show['poster'], 
             show['rating'], 
-            show["year"])
+            show["year"], 
+            show["runtime"])
         self.cursor.execute(query, params)
         self.cnx.commit()
 
