@@ -10,14 +10,16 @@ class DbAccess(object):
     """
     def __init__(self, db_name, usr, pwd=None):
         self.db_name = db_name
-        self.cnx = self.connect(usr, pwd)
+        self.db_url = "couchtubedb.clctie6ngr4h.us-west-1.rds.amazonaws.com"
+        self.connect(usr, pwd)
         self.cursor = self.cnx.cursor()
 
     def connect(self, usr, pwd=None):
         """Try to connect to DB
         """
         try:
-            cnx = mysql.connector.connect(user=usr, password=pwd)
+            self.cnx = mysql.connector.connect(user=usr, password=pwd, 
+                database=self.db_name, host=self.db_url)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
@@ -25,14 +27,7 @@ class DbAccess(object):
                 print("Database does not exists")
             else:
                 print(err)
-            return
-        else:  
-            try:
-                cnx.database = self.db_name 
-                return cnx
-            except mysql.connector.Error as err:
-                print(err)
-                exit(1)
+            exit(1)
 
     def close(self):
         """Disconnect from DB
