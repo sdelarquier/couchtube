@@ -39,8 +39,7 @@ class DbAccess(object):
 class DbGet(DbAccess):
     """Retrieve data from MySQL DB"""
     def __init__(self):
-        with open(os.path.join(os.path.dirname(__file__), 'scrt.json')) as f:
-            usr = json.load(f)['db_read']['usr']
+        usr = os.environ['usr_read']
         super(DbGet, self).__init__('couchtube', usr)
 
     def get_shows(self):
@@ -97,10 +96,8 @@ class DbPut(DbAccess):
     """Retrieve data from MySQL DB
     """
     def __init__(self):
-        with open(os.path.join(os.path.dirname(__file__), 'scrt.json')) as f:
-            dat = json.load(f)
-            usr = dat['db_write']['usr']
-            pwd = dat['db_write']['pwd']
+        usr = os.environ['usr_write']
+        pwd = os.environ['pwd_write']
         super(DbPut, self).__init__('couchtube', usr, pwd)
 
     def put_show(self, show):

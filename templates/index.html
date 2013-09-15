@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block head %}
     <title>CouchTube</title>
-    <link href="static/css/typeahead.css" rel="stylesheet">
+    <link href="{{url_for('static', filename='css/typeahead.css')}}" rel="stylesheet">
 {% endblock %}
 {% block content %}
 <div class='top-search'>
@@ -137,7 +137,7 @@
     $('#show-typeahead').typeahead({
       name: 'tv-shows',
       valueKey: 'title',
-      prefetch: 'static/data/shows.json',                                    
+      prefetch: 'shows',                                    
       // template: [
       //   '<p class="show-title">{{title}}</p>',                              
       //   '<p class="show-stats">{{ytcount}}/{{episodes}}</p>'                       

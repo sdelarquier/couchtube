@@ -14,8 +14,7 @@ class YtQuery(object):
         from apiclient.discovery import build
 
         # Build youtube engine
-        with open(os.path.join(os.path.dirname(__file__), 'scrt.json')) as f:
-            developer_key = json.load(f)['yt']
+        developer_key = os.environ['yt']
         youtube_api_service_name = "youtube"
         youtube_api_version = "v3"
         self.yt_engine = build(youtube_api_service_name, youtube_api_version,
@@ -30,6 +29,7 @@ class YtQuery(object):
             maxResults=5,
             videoEmbeddable='true',
             videoDuration='long',
+            regionCode='US',
             type='video'
         ).execute()
         
@@ -177,8 +177,8 @@ Each video is scored:
         if vids:
             vid_select = sorted(vids, 
                 key=lambda el: (el['score'], el['likes']))[-1]
-            print '########%s: %s (%s)' % (i, 
-                vid_select["snippet"]["title"], vid_select['score']) 
+            # print '########%s: %s (%s)' % (i, 
+            #     vid_select["snippet"]["title"], vid_select['score']) 
             return vid_select
 
     def _parse_time(self, time_str):

@@ -2,6 +2,7 @@ import dbutils
 import datagrab
 import ytquery
 import pickle
+import os
 
 
 def run_query(title, cache=False):
@@ -11,15 +12,16 @@ def run_query(title, cache=False):
     put = dbutils.DbPut()
 
     # Get merged data 
-    if cache:
+    if cache and os.path.exists('merged.%s.dat' % title):
         with open('merged.%s.dat' % title, 'rb') as f:
             show = pickle.load(f)
             episodes = pickle.load(f)
     else:
         merged = datagrab.DataMerge(title)
-        with open('merged.%s.dat' % title, 'wb') as f:
-            pickle.dump(merged.show, f)
-            pickle.dump(merged.episodes, f)
+        if cache:
+            with open('merged.%s.dat' % title, 'wb') as f:
+                pickle.dump(merged.show, f)
+                pickle.dump(merged.episodes, f)
         show = merged.show
         episodes = merged.episodes
 

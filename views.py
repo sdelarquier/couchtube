@@ -1,7 +1,7 @@
 from flask import render_template
 from flask import request
 from flask import jsonify
-from app import app
+from appct import app
 import dbutils
 import datagrab
 import ytquery
