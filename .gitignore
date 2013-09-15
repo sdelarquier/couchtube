@@ -1,5 +1,5 @@
 client_secrets.json
-scrt.json
+scrt.*
 *.pyc
 shows.json
 .elasticbeanstalk/

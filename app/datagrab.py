@@ -91,8 +91,7 @@ This tends to be a bit flaky (their server drops out everyday)
             "type": "/tv/tv_program"
             }]
         url = 'https://www.googleapis.com/freebase/v1/mqlread'
-        with open(os.path.join(os.path.dirname(__file__), 'scrt.json')) as f:
-            api_key = json.load(f)['freeb']
+        api_key = os.environ['freeb']
         params = {
             'query': json.dumps(query),
             'key': api_key
@@ -118,8 +117,7 @@ This tends to be a bit flaky (their server drops out everyday)
         query = {
             "seriesname": self.show_title,
             }
-        with open(os.path.join(os.path.dirname(__file__), 'scrt.json')) as f:
-            api_key = json.load(f)['tvdb']
+        api_key = os.environ['tvdb']
         url = 'http://thetvdb.com/api/GetSeries.php'
         # Get query results
         tmp = self.get_from_api(url, params=query)

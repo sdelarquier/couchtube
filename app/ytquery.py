@@ -14,8 +14,7 @@ class YtQuery(object):
         from apiclient.discovery import build
 
         # Build youtube engine
-        with open(os.path.join(os.path.dirname(__file__), 'scrt.json')) as f:
-            developer_key = json.load(f)['yt']
+        developer_key = os.environ['yt']
         youtube_api_service_name = "youtube"
         youtube_api_version = "v3"
         self.yt_engine = build(youtube_api_service_name, youtube_api_version,
