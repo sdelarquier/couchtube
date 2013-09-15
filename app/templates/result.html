@@ -8,7 +8,7 @@
 </div>
 <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
 <iframe id="player" data-epn='1' class="player-up" type="text/html"
-src="https://www.youtube.com/embed/{{ episodes[0][3] }}?rel=0&autohide=1&color=red&theme=dark&wmode=transparent"
+src="https://www.youtube.com/embed/{{ episodes[0][3] }}?rel=0&autohide=1&autoplay=1&color=red&theme=dark&wmode=transparent"
 frameborder="0" allowfullscreen></iframe>
 <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
   <button type="button" id="episode-prev" class="btn btn-default btn-sm episode-nav disabled"><i class="icon-chevron-left"></i></button>
@@ -148,7 +148,7 @@ frameborder="0" allowfullscreen></iframe>
       $('#episode-prev').addClass('disabled')
     }
     $('#episode-caption').stop(true);
-    $('#player').attr('src',"https://www.youtube.com/embed/"+vidId+"?rel=0&autohide=1&color=red&theme=dark&wmode=transparent");
+    $('#player').attr('src',"https://www.youtube.com/embed/"+vidId+"?rel=0&autohide=1&autoplay=1&color=red&theme=dark&wmode=transparent");
     $('#player').attr('data-epn', ind);
     $("#"+prev_ind).toggleClass('episode-active');
     $("#"+ind).toggleClass('episode-active');

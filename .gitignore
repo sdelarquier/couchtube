@@ -2,3 +2,6 @@ client_secrets.json
 scrt.json
 *.pyc
 shows.json
+.elasticbeanstalk/
+venv/
+tmp/
