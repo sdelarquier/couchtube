@@ -36,6 +36,11 @@ FROM series;
 
 SELECT title, season, episode, ytId, thumb
 FROM episodes
-WHERE series_title="Grand Designs Abroad"
-	AND series_year=2004
+WHERE series_title="Justified"
 ORDER BY season, episode;
+
+delete from episodes
+where series_title="Justified";
+
+delete from series
+where title="Justified";
