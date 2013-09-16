@@ -58,7 +58,8 @@ class YtQuery(object):
         return cat_response.get("items", [])
 
     def get_episode(self, show_title, 
-        ep_title, se_number, ep_number, runtime):
+        ep_title, se_number, ep_number, runtime, 
+        debug=False):
         """Finds a youtube video for a given episode
 Videos too short are exculded
 Videos with negative likes are excluded
@@ -71,7 +72,8 @@ Each video is scored:
         """
         from apiclient import errors
 
-        # print '\n', show_title, ep_title, se_number, ep_number
+        if debug:
+            print '\n', show_title, ep_title, se_number, ep_number
         lancaster = nltk.LancasterStemmer()
         sh_stem = [lancaster.stem(t) \
             for t in nltk.regexp_tokenize(show_title.encode('utf8'), r"\w+")]
@@ -169,16 +171,19 @@ Each video is scored:
             # print scores
             # print '======%s: %s (%s)' % (i, v["snippet"]["title"], v['score'])
             if v['score'] >= 1.85:
-                # print '====yt: %s / %s (%s) (%s paid)' % (v['duration'], 
-                #     runtime, v['duration']*1./runtime, v['paid'])
+                if debug:
+                    print '====yt: %s / %s (%s) (%s paid)' % (v['duration'], 
+                        runtime, v['duration']*1./runtime, v['paid'])
                 vids.append(v)
 
         # Return best video if found
         if vids:
             vid_select = sorted(vids, 
                 key=lambda el: (el['score'], el['likes']))[-1]
-            # print '########%s: %s (%s)' % (i, 
-            #     vid_select["snippet"]["title"], vid_select['score']) 
+            if debug:
+                print '====%s: %s (%s)' % (i, 
+                    vid_select["snippet"]["title"], 
+                    vid_select['score']) 
             return vid_select
 
     def _parse_time(self, time_str):

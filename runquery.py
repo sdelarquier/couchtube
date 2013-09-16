@@ -40,7 +40,7 @@ def run_query(title, cache=False):
     for key, name in episodes.items():
         # print show['title'], name, key[0], key[1], show['runtime']
         vids = yt.get_episode(show['title'], name, 
-            key[0], key[1], show['runtime'])
+            key[0], key[1], show['runtime'], debug=True)
         if vids:
             # Update episode info
             vid_count += 1
