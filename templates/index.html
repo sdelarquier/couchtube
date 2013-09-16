@@ -199,7 +199,7 @@
   // });
   function getShow(show) {
     // console.log(show);
-    $.getJSON('static/data/shows.json', function(data) {
+    $.getJSON('shows', function(data) {
       var found = false;
       $.each(data, function(ind, val) {
         // console.log(ind, val);
