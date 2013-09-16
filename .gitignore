@@ -6,4 +6,3 @@ shows.json
 .ebextensions/
 tmp/
 couchtube-env/
-install
