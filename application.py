@@ -12,17 +12,17 @@ application = flask.Flask(__name__)
 @application.route('/')
 @application.route('/index')
 def index():
-    series = shows(json=False)
+    series = shows(json_obj=False)
     return flask.render_template("index.html", 
         series=series)
 
 
 @application.route('/shows')
-def shows(json=True):
+def shows(json_obj=True):
     db = dbutils.DbGet()
     series = db.get_shows()
     db.close()
-    if not json:
+    if not json_obj:
         return series
     else:
         series_json = []
@@ -34,7 +34,7 @@ def shows(json=True):
                     'episodes': str(show[3]),
                     'ytcount': str(show[4])
                 })
-        return flask.jsonify(series_json)
+        return json.dumps(series_json)
 
 
 @application.route('/about')
