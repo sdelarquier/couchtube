@@ -1,0 +1,19 @@
+<<<<<<< HEAD
+Flask==0.10.1
+Jinja2==2.7.1
+MarkupSafe==0.18
+PyYAML==3.10
+Werkzeug==0.9.4
+itsdangerous==0.23
+mysql-connector-python==1.0.12
+nltk==2.0.4
+requests==1.2.3
+wsgiref==0.1.2
+xmltodict==0.7.0
+=======
+Flask==0.9
+mysql-connector-python>=1.0.12
+xmltodict>=0.7.0
+nltk>=2.0.4
+requests>=1.2.3
+>>>>>>> 7c789e4643381a1f55b3fe794845f01fa9739ca6
