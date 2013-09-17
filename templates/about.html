@@ -26,59 +26,7 @@
 <link rel="stylesheet" href="static/css/slides.css">
 {% endblock %}
 {% block content %}
-<article class="deck-container">
-
-    <!-- Begin slides. Just make elements with a class of slide. -->
-    <section class="slide title">
-        <h1><img src="static/img/couchtube_logo.svg"></h1>
-        <h3>lazy(er) TV.</h3>
-        <h4>Sebastien de Larquier</h4>
-    </section>
-
-    <section class="slide">
-        <h3>Watching TV shows on YouTube can be tedious...</h3>
-        <p>Where is the next episode? Is there a next one? Why are there so many versions of this episode? What is the title? Is there a synopsis? ...</p>
-        <a href="http://youtu.be/X0tegkDKRJI" target="_blank"><img src="static/img/youtube_screen.png"></a>
-    </section>
-
-    <section class="slide full">
-        <img src="static/img/engines.svg">
-    </section>
-
-    <section class="slide full">
-        <img src="static/img/about_me.svg">
-    </section>
-
-    <!-- End slides. -->
-
-
-    <!-- Begin extension snippets. Add or remove as needed. -->
-
-    <!-- deck.navigation snippet -->
-    <a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
-    <a href="#" class="deck-next-link" title="Next">&#8594;</a>
-
-    <!-- deck.status snippet -->
-    <p class="deck-status">
-        <span class="deck-status-current"></span>
-        /
-        <span class="deck-status-total"></span>
-    </p>
-
-    <!-- deck.goto snippet -->
-    <form action="." method="get" class="goto-form">
-        <label for="goto-slide">Go to slide:</label>
-        <input type="text" name="slidenum" id="goto-slide" list="goto-datalist">
-        <datalist id="goto-datalist"></datalist>
-        <input type="submit" value="Go">
-    </form>
-
-    <!-- deck.hash snippet -->
-    <a href="." title="Permalink to this slide" class="deck-permalink">#</a>
-
-    <!-- End extension snippets. -->
-</article>
-<div>Use <button class="btn btn-default btn-xs" onclick="$.deck('prev')"><i class="icon-long-arrow-left"></i></button> and <button class="btn btn-default btn-xs" onclick="$.deck('next')"><i class="icon-long-arrow-right"></i></span></button> keys to navigate.</div>
+<iframe class='deck-iframe' src="http://slid.es/sdelarquier/couchtube/embed" width="576" height="420" scrolling="no" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 {% endblock %}
 {% block scripts %}
 <!-- Required JS files. -->
@@ -95,8 +43,17 @@
 
 <!-- Initialize the deck. You can put this in an external file if desired. -->
 <script>
-    $(function() {
-        $.deck('.slide');
+    $(document).ready(function() {
+        resizeDeck();
     });
+    $(window).resize(function() {
+        resizeDeck();
+    });
+    function resizeDeck() {
+        var $deck = $('.deck-iframe');
+        $deck.css('width', $(window).width()-30);
+        $deck.css('height', $(window).height()-70);
+        $deck.css('margin-top', '20px');
+    }
 </script>
 {% endblock %}
