@@ -22,27 +22,15 @@
 <!-- Required Modernizr file -->
 <script src="static/js/modernizr.custom.js"></script>
 
-<!-- Custom slide styles -->    
+<!-- Custom slide styles -->
 <link rel="stylesheet" href="static/css/slides.css">
 {% endblock %}
 {% block content %}
 <iframe class='deck-iframe' src="http://slid.es/sdelarquier/couchtube/embed" width="576" height="420" scrolling="no" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 {% endblock %}
 {% block scripts %}
-<!-- Required JS files. -->
-<script src="static/deckjs/core/deck.core.js"></script>
-
-<!-- Extension JS files. Add or remove as needed. -->
-<script src="static/deckjs/core/deck.core.js"></script>
-<script src="static/deckjs/extensions/hash/deck.hash.js"></script>
-<script src="static/deckjs/extensions/menu/deck.menu.js"></script>
-<script src="static/deckjs/extensions/goto/deck.goto.js"></script>
-<script src="static/deckjs/extensions/status/deck.status.js"></script>
-<script src="static/deckjs/extensions/navigation/deck.navigation.js"></script>
-<script src="static/deckjs/extensions/scale/deck.scale.js"></script>
-
 <!-- Initialize the deck. You can put this in an external file if desired. -->
-<script>
+<script type="text/javascript">
     $(document).ready(function() {
         resizeDeck();
     });
@@ -54,7 +42,7 @@
         $deck.css('width', $(window).width()-30);
         $deck.css('height', $(window).height()-70);
         $deck.css('margin-top', '20px');
-        $deck.focus()
+        $deck.focus();
     }
 </script>
 {% endblock %}

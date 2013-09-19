@@ -65,6 +65,10 @@ body {
   right: 5px;
 }
 
+.reveal.cube .slides section:not(.stack):before {
+  background-color: none;
+}
+
 
 /*
 ***************************
@@ -146,7 +150,7 @@ Watch page
 .pop-left {
   position: absolute;
   left: 0;
-  bottom: 160px;
+  top: 60px;
   max-width: 90%;
   padding: 5px 10px;
   /*background-image: url('../img/carbon_fibre.png');*/

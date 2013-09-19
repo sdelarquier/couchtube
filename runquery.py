@@ -5,7 +5,7 @@ import pickle
 import os
 
 
-def run_query(title, cache=False):
+def run_query(title, cache=False, debug=False):
     """Execute all steps of an actual query, from getting/merging data, to placing it in the DB
     """
     # Open Push access to DB
@@ -40,7 +40,7 @@ def run_query(title, cache=False):
     for key, name in episodes.items():
         # print show['title'], name, key[0], key[1], show['runtime']
         vids = yt.get_episode(show['title'], name, 
-            key[0], key[1], show['runtime'], debug=True)
+            key[0], key[1], show['runtime'], debug=debug)
         if vids:
             # Update episode info
             vid_count += 1
