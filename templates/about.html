@@ -9,17 +9,19 @@
 <!-- Initialize the deck. You can put this in an external file if desired. -->
 <script type="text/javascript">
     $(document).ready(function() {
-        resizeDeck();
+        $('.deck-iframe').focus();
+        // resizeDeck();
     });
-    $(window).resize(function() {
-        resizeDeck();
-    });
-    function resizeDeck() {
-        var $deck = $('.deck-iframe');
-        $deck.css('width', $(window).width()-30);
-        $deck.css('height', $(window).height()-70);
-        $deck.css('margin-top', '20px');
-        $deck.focus();
-    }
+    // $(window).resize(function() {
+    //     resizeDeck();
+    // });
+    // function resizeDeck() {
+    //     var $deck = $('.deck-iframe');
+    //     $deck.css('width', $(window).width());
+    //     $deck.css('height', $(window).height()-70);
+    //     $deck.css('margin-top', '-40px');
+    //     $deck.css('margin-left', '-15px');
+    //     $deck.focus();
+    // }
 </script>
 {% endblock %}
