@@ -14,7 +14,6 @@
     <div class="input-show">
       <input id="show-typeahead" class="typeahead" type="text" placeholder="TV show title">
     </div>
-    <button type='button' class='btn btn-default search-button'><i class="icon-search icon-large"></i></button>
   </div>
 </div>
 <!-- /SEARCH BAR -->
@@ -38,7 +37,7 @@
           </a>
         </div>
         <!-- Modal -->
-        <div class="modal fade" id="modal-{{ title|replace(' ', '') }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal fade modal-show" id="modal-{{ title|replace(' ', '') }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -47,14 +46,10 @@
               </div>
               <div class="modal-body">
                 <div class="row">
-                  <div class="col-md-6 col-md-offset-3" style="text-align: left;">
-                    <div class="progress">
-                      <div class="progress-bar progress-bar-grey" role="progressbar" aria-valuenow="{{ ytcount/episodes*100 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ ytcount/episodes*100 }}%"></div>
-                      <span class='progress-title'>Episodes</span><span class="pull-right">{{ ytcount }} / {{ episodes }}</span>
-                    </div>
-                    <div class="progress">
-                      <div class="progress-bar progress-bar-grey" role="progressbar" aria-valuenow="{{ ppay }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ ppay }}%"></div>
-                      <span class='progress-title'>Free content</span><span class="pull-right">{{ ppay }}%</span>
+                  <div class="col-md-6 col-md-offset-3 column-bar" style="text-align: left;">
+                    <div class="container-bar">
+                      <span>Episodes</span>
+                      <span class="info-bar" data-name="{{ title }}" data-year="{{ year }}"></span>
                     </div>
                   </div>
                 </div>
@@ -121,6 +116,9 @@
 {% block scripts %}
 <script src="static/js/hogan-2.0.0.js"></script>
 <script src="static/js/typeahead.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="static/js/styling.js"></script>
+<script src="static/js/data.js"></script>
 <script type="text/javascript">
   $(window).resize(function() {
     $('.play-button').map(function(){
@@ -129,13 +127,13 @@
         "margin-top": - $(this).outerHeight()/2
       });
     });
-    $(".show-poster")
     $(".show-poster").each(function() {
       $(this).css('max-height', 0.6*$(window).height());
     });
     $('.show-poster-list').each(function() {
       $(this).css('width', $(this).parents('.show-list-elem').width());
     });
+    $('.column-bar').each(modalOnResize);
   });
   $(document).ready(function() {
     $('.link-tooltip').tooltip();
@@ -144,18 +142,13 @@
     $('#show-typeahead').typeahead({
       name: 'tv-shows',
       valueKey: 'title',
-      prefetch: 'shows',                                    
-      // template: [
-      //   '<p class="show-title">{{title}}</p>',                              
-      //   '<p class="show-stats">{{ytcount}}/{{episodes}}</p>'                       
-      // ].join(''),
-      // engine: Hogan                                                               
+      prefetch: 'shows',
     });
     // Size the search box
     $('.input-show').find('*').each( function() {
-      $(this).css('box-sizing','content-box')
+      $(this).css('box-sizing','content-box');
     });
-    // Search send
+    // Search send (press enter)
     $('#show-typeahead').keypress(function (e) {
       if (e.which == 13) {
         var show = $(this).val();
@@ -163,63 +156,10 @@
         return false;
       }
     });
-    $('.search-button').click(function() {
-      var show = $(this).parent().find('#show-typeahead').val();
-      getShow(show);
-    });
     // Start show finder engine
-    $('#find-my-show').click(function() {
-      $('#modal-alert').modal('hide');
-      var show = $('#show-typeahead').val();
-      $('#modal-search').find('.modal-body').html('<img src="static/img/ajax-loader.gif">')
-      $.get("/findShow?title="+show, function(data) {
-        // console.log(data);
-        $('#modal-search').find('.modal-body').html('');
-        var out = "";
-        if (data != 'None') {
-          out += "<p>Is this the show you are looking for?</p>";
-          out += "<p><b><span id='search-results'>"+data.Series.SeriesName+"</span> ("+data.Series.FirstAired.substr(0,4)+")</b></p>";
-          if (data.Series.banner) {
-            out += "<img class='img-thumbnail' src='http://thetvdb.com/banners/"+data.Series.banner+"'>";
-          }
-          out += '<p></p>';
-          out += '<div id="I-have-too-many-ids"><button type="button" class="btn btn-primary" id="yt-get-show">Yes, get it!</button></div>';
-        } else {
-          out += "<p>Sorry, I could not find your show...</p>";
-        }
-        $('#modal-search').find('.modal-body').html(out);
-        // Start show loader engine
-        $('#yt-get-show').click(function() {
-          var show = $('#modal-search').find('#search-results').text();
-          console.log('Get show ', show)
-          $('#I-have-too-many-ids').html('<div>This may take a while (1-2 minutes)</div><img src="static/img/ajax-loader.gif">');
-          $.get("/ingestData?title="+show, function(data) {
-            $('#I-have-too-many-ids').html('<div>Your show is ready: '+data.ytcount+' out of '+data.episodes+' episodes found.</div><a role="button" class="btn btn-primary" href="/watch?nm='+data.title+'&yy='+data.year+'">Start watching</a>');
-          });
-        });
-        $('#modal-search').modal('show');
-      });
-    });
+    $('#find-my-show').click(addShow);
+    // Modal info
+    $('.modal-show').on('shown.bs.modal', modalOnShow);
   });
-  // $('.modal').on('shown.bs.modal', function () {
-  //   $(window).resize();
-  // });
-  function getShow(show) {
-    // console.log(show);
-    $.getJSON('shows', function(data) {
-      var found = false;
-      $.each(data, function(ind, val) {
-        // console.log(ind, val);
-        if (val['title']==show) {
-          found = true;
-          $('#modal-'+show.replace(/ /g, "")).modal('show');
-        }
-      });
-      if (found == false) {
-        $('#modal-alert').find('.modal-body').find('#alert-show-title').html(show);
-        $('#modal-alert').modal('show');
-      }
-    });
-  };
 </script>
 {% endblock %}

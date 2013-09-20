@@ -39,7 +39,7 @@ body {
   z-index: 3000;
 }
 
-.progress {
+/*.progress {
   position: relative;
   background-color: #777;
 }
@@ -63,10 +63,45 @@ body {
   position: absolute;
   top: 0;
   right: 5px;
+}*/
+
+/*
+***************************
+Chunky progress bar
+***************************
+*/
+.container-bar {
+  display: inline-block;
+  position: relative;
+  text-align: left;
 }
 
-.reveal.cube .slides section:not(.stack):before {
-  background-color: none;
+.info-bar {
+  position: absolute;
+  right: 0px;
+}
+
+.progress-bar {
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.rect-bar-free {
+  fill: #ff7a00;
+}
+
+.episode-free {
+  color: #ff7a00;
+}
+
+.rect-bar {
+  fill: #03899c;
+}
+
+.paying {
+  fill: red;
 }
 
 

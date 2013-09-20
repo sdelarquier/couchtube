@@ -8,6 +8,10 @@ import json
 
 application = flask.Flask(__name__)
 
+@application.route('/bar')
+def bar():
+    return flask.render_template("d3progressbar.html")
+
 
 @application.route('/')
 @application.route('/index')
@@ -35,6 +39,17 @@ def shows(json_obj=True):
                     'ytcount': str(show[4])
                 })
         return json.dumps(series_json)
+
+
+@application.route('/completeness')
+def completeness():
+    show = flask.request.args.get('nm', '')
+    year = flask.request.args.get('yy', '')
+    db = dbutils.DbGet()
+    series = db.get_shows()
+    comps = db.get_completeness(show, year)
+    db.close()
+    return json.dumps(comps)
 
 
 @application.route('/about')
@@ -79,4 +94,6 @@ def ingestData():
 
 if __name__ == '__main__':
     application.debug = True
-    application.run(host='0.0.0.0')
+    application.run(host='localhost')
+    # application.debug = False
+    # application.run(host='0.0.0.0')

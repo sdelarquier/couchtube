@@ -125,9 +125,6 @@ Each video is scored:
             nlikes = int(vid_more['statistics']['likeCount'].encode('utf8'))
             ndislikes = int(vid_more['statistics']['dislikeCount'].encode('utf8'))
             v['likes'] = nlikes - ndislikes
-            # nvotes = nlikes + ndislikes
-            # if v['likes'] < -nvotes/5.:
-            #     continue
 
             # Init score
             scores = [0]*5

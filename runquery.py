@@ -38,7 +38,6 @@ def run_query(title, cache=False, debug=False):
     vid_count = 0
     paid_count = 0
     for key, name in episodes.items():
-        # print show['title'], name, key[0], key[1], show['runtime']
         vids = yt.get_episode(show['title'], name, 
             key[0], key[1], show['runtime'], debug=debug)
         if vids:

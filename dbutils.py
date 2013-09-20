@@ -2,6 +2,7 @@ import mysql.connector
 from mysql.connector import errorcode
 import json
 import os
+import sys
 import nltk
 
 
@@ -27,7 +28,7 @@ class DbAccess(object):
                 print("Database does not exists")
             else:
                 print(err)
-            exit(1)
+            sys.exit(1)
 
     def close(self):
         """Disconnect from DB
@@ -68,6 +69,29 @@ class DbGet(DbAccess):
             """)
         self.cursor.execute(query, (show, year))
         return [s for s in self.cursor]
+
+    def get_completeness(self, show, year):
+        """Return the completeness of a show, and the list of episodes
+        """
+        out = {'episodes': 0, 
+               'found': [],
+               'free': []}
+        query = ("""
+            SELECT season, episode, paid, ytId
+            FROM episodes 
+            WHERE series_title=%s
+                AND series_year=%s
+            ORDER BY season, episode
+            """)
+        self.cursor.execute(query, (show, year))
+        data = self.cursor.fetchall()
+        out['episodes'] = len(data)
+        out['found'] = [i+1 for i,el in enumerate(data) 
+                            if el[3] is not None]
+        out['free'] = [i+1 for i,el in enumerate(data) 
+                            if el[3] is not None
+                            and el[2]==0]
+        return out
 
     def check_title(self, show_title):
         """Check if a show is in the database, allowing for messy entries
