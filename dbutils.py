@@ -171,7 +171,7 @@ class DbPut(DbAccess):
         """
         query = ("""
             UPDATE series
-            SET {}=%s
+            SET {0:}=%s
             WHERE title=%s AND year=%s;
             """.format(field))
         params = (value, show, year)
@@ -184,7 +184,7 @@ class DbPut(DbAccess):
         """
         query = ("""
             UPDATE episodes
-            SET {}=%s
+            SET {0:}=%s
             WHERE series_title=%s AND series_year=%s
                 AND episode=%s AND season=%s;
             """.format(field))

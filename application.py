@@ -33,10 +33,8 @@ def shows(json_obj=True):
         for show in series:
             series_json.append(
                 {
-                    'title': show[0],
-                    'tokens': show[0].split(), 
-                    'episodes': str(show[3]),
-                    'ytcount': str(show[4])
+                    'value': show[0],
+                    'tokens': show[0].split()
                 })
         return json.dumps(series_json)
 
@@ -89,11 +87,22 @@ def findShow():
 @application.route('/ingestData')
 def ingestData():
     title = flask.request.args.get('title', '')
-    show, _ = runquery.run_query(title)
-    return flask.jsonify(show)
+    # show, _ = runquery.run_query(title)
+    # return flask.jsonify(show)
+    return flask.Response(
+        runquery.run_query(title),
+        mimetype='text/event-stream')
+
+
+def event_stream():
+    count = 0
+    while count < 10:
+        yield 'data: %s\n\n' % count
+        count += 1
+    yield 'event: end\ndata: this is the end\n\n'
+
 
 if __name__ == '__main__':
     # application.debug = True
     # application.run(host='localhost')
-    application.debug = False
     application.run(host='0.0.0.0')

@@ -176,8 +176,10 @@ Each video is scored:
                 pass
 
             # Find out if paid content (bonus if it is)
-            v['paid'] = 1 if len(vid_more['contentDetails']['contentRating'])>1 else 0
-            if v['paid'] == 1:
+            v['paid'] = 0
+            if 'contentRating' in vid_more['contentDetails'] \
+            and len(vid_more['contentDetails']['contentRating']) > 1:
+                v['paid'] = 1
                 scores[4] = .4
 
             # Total score and append if good enough

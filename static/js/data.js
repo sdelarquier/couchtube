@@ -47,14 +47,38 @@ function addShow() {
     $('#yt-get-show').click(function() {
       var show = $('#modal-search').find('#search-results').text();
       console.log('Get show ', show)
-      $('#I-have-too-many-ids').html('<div>This may take a while (1-2 minutes)</div><img src="static/img/ajax-loader.gif">');
-      $.get("/ingestData?title="+show, function(data) {
-        $('#I-have-too-many-ids').html('<div>Your show is ready: '+data.ytcount+' out of '+data.episodes+' episodes found.</div><a role="button" class="btn btn-primary" href="/watch?nm='+data.title+'&yy='+data.year+'">Start watching</a>');
-      });
+      $('#I-have-too-many-ids').html(
+        '<div>Loading new show. This may take a while (1-2 minutes)</div>'
+          +'<div class="progress progress-striped active">'
+            +'<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">'
+            +'</div>'
+          +'</div>'
+        +'</div>');
+
+      sse = new EventSource("/ingestData?title="+show);
+      sse.addEventListener('end', endStream, false);
+      function endStream(event) {
+        console.log('End stream', event.data);
+        sse.close()
+        data = event.data.split('\n');
+        $('#I-have-too-many-ids').html(
+          '<div>Your show is ready: '
+          +data[3]+' out of '
+          +data[2]
+          +" episodes found ("+data[4]+" Free)."
+          +'</div><a role="button" class="btn btn-primary" href="/watch?nm='
+          +data[0]+'&yy='+data[1]+'">Start watching</a>');
+      };
+      sse.onmessage = function(message) {
+        console.log(event.data);
+        var pbar = $('#I-have-too-many-ids').find('.progress-bar');
+        pbar.attr('aria-valuenow', message.data);
+        pbar.attr('style', 'width: '+message.data+'%;');
+      };
+      // $.get("/ingestData?title="+show, function(data) {
+      // });
     });
 
     $('#modal-search').modal('show');
   });
 };
-
-

@@ -132,7 +132,7 @@ This tends to be a bit flaky (their server drops out everyday)
             return
         # Query episodes (separate)
         if not show_only and self.tvdb is not None:
-            url_sec = 'http://thetvdb.com/api/{}/series/{}/all'.format(
+            url_sec = 'http://thetvdb.com/api/%s/series/%s/all' % (
                 api_key, self.tvdb['Series']['seriesid'])
             tmp = self.get_from_api(url_sec)
             if tmp is not None:
