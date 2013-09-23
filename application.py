@@ -93,7 +93,7 @@ def ingestData():
     return flask.jsonify(show)
 
 if __name__ == '__main__':
-    application.debug = True
-    application.run(host='localhost')
-    # application.debug = False
-    # application.run(host='0.0.0.0')
+    # application.debug = True
+    # application.run(host='localhost')
+    application.debug = False
+    application.run(host='0.0.0.0')
