@@ -8,7 +8,7 @@ function getShow(show) {
       // console.log(ind, val);
       if (val['title']==show) {
         found = true;
-        $('#modal-'+show.replace(/ /g, "")).modal('show');
+        $('#modal-'+show.replace(/ /g, "").replace(/!/g, "")).modal('show');
       }
     });
 
