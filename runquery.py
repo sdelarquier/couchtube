@@ -75,5 +75,5 @@ def run_query(title, cache=False, debug=False):
 
     # return show, episodes
     yield 'event: end\ndata: %s\ndata: %s\ndata: %s\ndata: %s\ndata: %s\n\n' % (
-        show['title'], show['year'], count_max, vid_count, paid_count)
+        show['title'], show['year'], count_max, vid_count, vid_count-paid_count)
 
