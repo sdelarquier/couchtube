@@ -55,7 +55,7 @@ function buildBar(show_name, show_year, parent) {
   d3.json("/completeness?nm="+show_name+'&yy='+show_year, function(error, data) {
     if (error) return console.warn(error);
 
-    x.domain([0, data.episodes]).nice();
+    x.domain([0, data.episodes-1]);
     y.domain([0, 0]);
 
     svg.selectAll(".rect-bar")
