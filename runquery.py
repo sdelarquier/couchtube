@@ -25,6 +25,9 @@ def run_query(title, cache=False, debug=False):
         show = merged.show
         episodes = merged.episodes
 
+    # number of episodes
+    count_max = len(episodes)
+
     if debug:
         print '    Merged data'
     yield 'data: %s\n\n' % (3./(count_max+9)*100)
@@ -44,7 +47,6 @@ def run_query(title, cache=False, debug=False):
     vid_count = 0
     paid_count = 0
     count = 0
-    count_max = len(episodes)
     for key, name in episodes.items():
         count += 1
         vids = yt.get_episode(show['title'], name, 
