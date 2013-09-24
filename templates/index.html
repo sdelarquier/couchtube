@@ -140,8 +140,9 @@
     $(window).resize();
     // Search typeahead
     $('#show-typeahead').typeahead({
-      name: 'tv-shows',
-      prefetch: 'shows',
+      name: 'tv-shows-search',
+      valueKey: 'title',
+      prefetch: {url: 'shows', ttl: 3600000},
     });
     // Size the search box
     $('.input-show').find('*').each( function() {

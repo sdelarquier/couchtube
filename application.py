@@ -33,7 +33,7 @@ def shows(json_obj=True):
         for show in series:
             series_json.append(
                 {
-                    'value': show[0],
+                    'title': show[0],
                     'tokens': show[0].split()
                 })
         return json.dumps(series_json)
@@ -103,6 +103,6 @@ def event_stream():
 
 
 if __name__ == '__main__':
-    # application.debug = True
-    # application.run(host='localhost')
-    application.run(host='0.0.0.0')
+    application.debug = True
+    application.run(host='localhost')
+    # application.run(host='0.0.0.0')
