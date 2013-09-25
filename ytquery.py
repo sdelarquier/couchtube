@@ -13,6 +13,14 @@ class YtQuery(object):
         sys.path.append('ytapi')
         from apiclient.discovery import build
 
+        # Stemmer
+        self._lancaster = nltk.LancasterStemmer()
+
+        # Reputation bag of words
+        badwords = ['AfterBuzz', 'podcast', 'AfterShow']
+        self._badwords = [self._lancaster.stem(w)
+            for w in badwords]
+
         # Build youtube engine
         developer_key = os.environ['yt']
         youtube_api_service_name = "youtube"
@@ -33,13 +41,19 @@ class YtQuery(object):
             type='video'
         ).execute()
         
-        return search_response.get("items", [])
+        response = dict((v['id']['videoId'],v) 
+            for v in search_response.get("items", []))
+        videos = self.video(','.join(response.keys()))
+        for vid in videos:
+            for k, val in vid.items():
+                response[vid['id']][k] = val
+        return response
 
     def video(self, id):
         """Get video info from youtube
         """
         vid_response = self.yt_engine.videos().list(
-            part="contentDetails,statistics,snippet",
+            part="id,contentDetails,statistics,snippet",
             id=id,
             maxResults=1
         ).execute()
@@ -56,74 +70,99 @@ class YtQuery(object):
         
         return cat_response.get("items", [])
 
-    def get_episode(self, show_title, 
-        ep_title, se_number, ep_number, runtime, 
-        debug=False):
+    def query_episode(self, show_title, 
+        ep_title, se_number, ep_number, runtime):
+        """build video list prior to scoring
+        """
+        qres = {}
+
+        # Query 1
+        qlist = (show_title, ep_title)
+        # Search YouTube
+        tmp = self.search('%s %s' % qlist)
+        for k, v in tmp.items():
+            qres[k] = v
+        # Query 2
+        qlist = (show_title, ep_title, 
+            se_number, ep_number)
+        # Search YouTube
+        tmp = self.search('%s %s  %s  %s' % qlist)
+        for k, v in tmp.items():
+            qres[k] = v
+        # Query 3
+        qlist = (show_title, 
+            se_number, ep_number)
+        # Search YouTube
+        tmp = self.search('%s s%02de%02d' % qlist)
+        for k, v in tmp.items():
+            qres[k] = v
+
+        # Show tokens
+        sh_stem = [self._lancaster.stem(t) \
+            for t in nltk.regexp_tokenize(
+                show_title.encode('utf8'), r"\w+")]
+
+        # Episode stem tokens if exist
+        if ep_title:
+            ep_stem = [self._lancaster.stem(t) \
+                for t in nltk.regexp_tokenize(
+                    ep_title.encode('utf8'), r"\w+")]
+
+        res = {'Output': qres, 
+               'Input': {},}
+        res['Input']['show_title'] = show_title
+        res['Input']['ep_title'] = ep_title
+        res['Input']['sh_stem'] = sh_stem
+        res['Input']['ep_stem'] = ep_stem
+        res['Input']['se_number'] = se_number
+        res['Input']['ep_number'] = ep_number
+        res['Input']['runtime'] = runtime
+
+        return res
+
+    def get_episode(self, query_result, debug=False):
         """Finds a youtube video for a given episode
 Videos too short are exculded
 Videos with negative likes are excluded
 Each video is scored:
 - [0-1]: the show name is in the video name
 - [0-1]: the episode title is in the video name
+- [-1-0]: for bad words (reputation list)
 - [0-0.5]: the season number is in the video name
 - [0-0.5]: the episode number is in the video name
-- [0-0.4]: paid content
+- [0-0.6]: paid content
         """
         from apiclient import errors
 
+        show_title = query_result['Input']['show_title']
+        ep_title = query_result['Input']['ep_title']
+        sh_stem = query_result['Input']['sh_stem']
+        ep_stem = query_result['Input']['ep_stem']
+        se_number = query_result['Input']['se_number']
+        ep_number = query_result['Input']['ep_number']
+        runtime = query_result['Input']['runtime']
+
         if debug:
             print '\n', show_title, ep_title, se_number, ep_number
-        lancaster = nltk.LancasterStemmer()
-        sh_stem = [lancaster.stem(t) \
-            for t in nltk.regexp_tokenize(
-                show_title.encode('utf8'), r"\w+")]
-
-        # Episode stem tokens if exist
-        if ep_title:
-            ep_stem = [lancaster.stem(t) \
-                for t in nltk.regexp_tokenize(
-                    ep_title.encode('utf8'), r"\w+")]
-
-        # Query 1
-        qlist = (show_title, ep_title)
-        # Search YouTube
-        res = self.search('%s %s' % qlist)
-        # Query 2
-        qlist = (show_title, ep_title, 
-            se_number, ep_number)
-        # Search YouTube
-        res += self.search('%s %s  %s  %s' % qlist)
-        # Query 3
-        qlist = (show_title, 
-            se_number, ep_number)
-        # Search YouTube
-        res += self.search('%s s%02de%02d' % qlist)
-
-        # Remove duplicates
-        res = dict((v['id']['videoId'],v) for v in res).values()
-        if debug:
-            print "Received %s results" % len(res)
+            print "Received %s results" % len(query_result['Output'])
 
         # Parse and score results
         vids = []
-        for i,v in enumerate(res):
-            # Get more details about the video
-            vid_more = self.video(v['id']['videoId'])[0]
-
+        for vidId, v in query_result['Output'].items():
             # Foreign video filter
-            ch_name = vid_more['snippet']['channelTitle']
+            ch_name = v['snippet']['channelTitle']
             if len(re.findall('[^A-Za-z0-9\s]', ch_name)) >= len(ch_name)/3.:
                 continue
 
             # Video duration filter (some parsing recquired)
-            dur_str = vid_more['contentDetails']['duration'].encode('utf8')
+            dur_str = v['contentDetails']['duration'].encode('utf8')
             v['duration'] = self._parse_time(dur_str)
             if not (1.2 > v['duration']*1./runtime > .5):
                 continue
 
-            # Reject videos with negative likes
-            nlikes = int(vid_more['statistics']['likeCount'].encode('utf8'))
-            ndislikes = int(vid_more['statistics']['dislikeCount'].encode('utf8'))
+            # likes
+            nlikes = int(v['statistics']['likeCount'].encode('utf8'))
+            ndislikes = int(v['statistics']['dislikeCount'].encode('utf8'))
             v['likes'] = nlikes - ndislikes
 
             # Init score
@@ -132,13 +171,21 @@ Each video is scored:
             # Fix encoding problems
             title = v["snippet"]["title"].encode('utf8')
 
-            # Tokenize and step video title
+            # Tokenize and stem video title
             tok = nltk.regexp_tokenize(title, r"\w+")
-            stem = [lancaster.stem(t) for t in tok]
+            stem = [self._lancaster.stem(t) for t in tok]
 
             # show title in video title
             if len(set(sh_stem) & set(stem)) > 0:
-                scores[0] = 1
+                scores[0] += 1
+
+            # Bad words penalty
+            if len(set(stem) & set(self._badwords)) > 0:
+                scores[0] -= 1
+
+            # Guess if official show (and get a bonus)
+            if v["snippet"]["categoryId"] == '43':
+                scores[0] = 1.1
 
             # Seson and episode number matching
             season = nltk.regexp_tokenize(title, 
@@ -157,28 +204,19 @@ Each video is scored:
                 if season:
                     for s in season:
                         title = title.replace(s, '')
-                if episode:
+                if episode and 'episode' not in ep_title.lower():
                     for e in episode:
                         title = title.replace(e, '')
                 tok = nltk.regexp_tokenize(title, r"\w+")
-                stem = [lancaster.stem(t) for t in tok]
+                stem = [self._lancaster.stem(t) for t in tok]
                 stem = [s for s in stem if s not in sh_stem]
                 if stem:
                     scores[1] = len(set(ep_stem) & set(stem))*1./len(set(stem))
 
-            # Guess if official show (and get a bonus)
-            try:
-                cat = self.category(vid_more["snippet"]["categoryId"])[0]
-                cat_title = cat["snippet"]["title"].encode('utf8')
-                if cat_title == 'Shows':
-                    scores[0] = 1.1
-            except errors.HttpError:
-                pass
-
             # Find out if paid content (bonus if it is)
             v['paid'] = 0
-            if 'contentRating' in vid_more['contentDetails'] \
-            and len(vid_more['contentDetails']['contentRating']) > 1:
+            if 'contentRating' in v['contentDetails'] \
+            and 'tvpgRating' in v['contentDetails']['contentRating']:
                 v['paid'] = 1
                 scores[4] = .4
 
@@ -186,7 +224,8 @@ Each video is scored:
             v['score'] = sum(scores)
             # print scores
             if debug:
-                print '==%s: %s (%s)' % (i, v["snippet"]["title"], v['score'])
+                print '==yt: %s (%s: %s)' % (v["snippet"]["title"], 
+                    v['score'], scores)
             if v['score'] >= 1.85:
                 if debug:
                     print '==yt: %s / %s (%s) (%s paid)' % (v['duration'], 

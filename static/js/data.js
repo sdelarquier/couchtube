@@ -5,8 +5,6 @@ function getShow(show) {
 
     var found = false;
     $.each(data, function(ind, val) {
-      console.log(val)
-      console.log(val['title'], val['title']==show)
       if (val['title']==show) {
         found = true;
         $('#modal-'+show.replace(/ /g, "").replace(/!/g, "")).modal('show');
