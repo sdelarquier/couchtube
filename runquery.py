@@ -4,64 +4,6 @@ import ytquery
 import pickle
 import os
 import sys
-import threading
-import Queue
-
-
-# Create threading lock
-GRID_LOCK = threading.Lock()
-# empty counters
-count = 0
-vid_count = 0
-paid_count = 0
-
-
-class EpisodeQuery(threading.Thread):
-    """Unique thread for single episode video search and match
-    """
-    def __init__(self, key, name, yt, 
-    show, count_max, queue, put, 
-    debug=True):
-        super(EpisodeQuery, self).__init__()
-        self.key = key
-        self.name = name
-        self.yt = yt
-        self.show = show
-        self.count_max = count_max
-        self.queue = queue
-        self.put = put
-        self.debug = debug
-
-    def run(self):
-        global count
-        global vid_count
-        global paid_count
-        GRID_LOCK.acquire()
-        query_res = self.yt.query_episode(
-            self.show['title'], self.name, 
-            self.key[0], self.key[1], self.show['runtime'])
-        count += 0.5
-        GRID_LOCK.release()
-        self.queue.put('data: %s\n\n' % ((count+6.)*1./(self.count_max+6.)*100))
-        vids = self.yt.get_episode(query_res, debug=self.debug)
-        GRID_LOCK.acquire()
-        count += 0.5
-        if vids:
-            # Update episode info
-            vid_count += 1
-            paid_count += vids['paid']
-            self.put.update_episode(self.show['title'], self.show['year'], 
-                self.key[0], self.key[1], 
-                'ytId', vids['id'])
-            self.put.update_episode(self.show['title'], self.show['year'], 
-                self.key[0], self.key[1], 
-                'thumb', vids['snippet']['thumbnails']['default']['url'])
-            self.put.update_episode(self.show['title'], self.show['year'], 
-                self.key[0], self.key[1], 
-                'paid', vids['paid'])
-        GRID_LOCK.release()
-        self.queue.put('data: %s\n\n' % ((count+6.)*1./(self.count_max+6.)*100))
-        return
 
 
 def run_query(title, cache=False, debug=False):
@@ -103,26 +45,34 @@ def run_query(title, cache=False, debug=False):
 
     # Get YT videos
     yt = ytquery.YtQuery()
-    # Start threading queue
-    queue = Queue.Queue()
+    # empty counters
+    count = 0
+    vid_count = 0
+    paid_count = 0
     # Threaded episode search and match
     for key, name in episodes.items():
-        loop = EpisodeQuery(key=key, name=name, yt=yt, 
-            show=show, count_max=count_max, 
-            queue=queue, put=put, 
-            debug=debug)
-        loop.start()
-
-    tcount = 0
-    while tcount < len(episodes):
-        if not queue.empty():
-            out = queue.get(False)
-            tcount += 1
-            yield out
-            queue.task_done()
-
-    # Wait until queue done
-    queue.join()
+        query_res = yt.query_episode(
+            show['title'], name, 
+            key[0], key[1], show['runtime'])
+        count += 0.5
+        yield 'data: %s\n\n' % ((count+6.)*1./(count_max+6.)*100)
+        vids = yt.get_episode(query_res, debug=debug)
+        
+        count += 0.5
+        if vids:
+            # Update episode info
+            vid_count += 1
+            paid_count += vids['paid']
+            put.update_episode(show['title'], show['year'], 
+                key[0], key[1], 
+                'ytId', vids['id'])
+            put.update_episode(show['title'], show['year'], 
+                key[0], key[1], 
+                'thumb', vids['snippet']['thumbnails']['default']['url'])
+            put.update_episode(show['title'], show['year'], 
+                key[0], key[1], 
+                'paid', vids['paid'])
+        yield 'data: %s\n\n' % ((count+6.)*1./(count_max+6.)*100)
 
     # Update show info 
     show['ytcount'] = vid_count
