@@ -40,10 +40,12 @@ class EpisodeQuery(threading.Thread):
         query_res = self.yt.query_episode(
             self.show['title'], self.name, 
             self.key[0], self.key[1], self.show['runtime'])
+        count += 0.5
         GRID_LOCK.release()
+        self.queue.put('data: %s\n\n' % ((count+6.)*1./(self.count_max+6.)*100))
         vids = self.yt.get_episode(query_res, debug=self.debug)
         GRID_LOCK.acquire()
-        count += 1
+        count += 0.5
         if vids:
             # Update episode info
             vid_count += 1
@@ -58,7 +60,7 @@ class EpisodeQuery(threading.Thread):
                 self.key[0], self.key[1], 
                 'paid', vids['paid'])
         GRID_LOCK.release()
-        self.queue.put('data: %s\n\n' % ((count+9.)*1./(self.count_max+9.)*100))
+        self.queue.put('data: %s\n\n' % ((count+6.)*1./(self.count_max+6.)*100))
         return
 
 
@@ -87,17 +89,17 @@ def run_query(title, cache=False, debug=False):
 
     if debug:
         print '    Merged data'
-    yield 'data: %s\n\n' % (3./(count_max+9)*100)
+    yield 'data: %s\n\n' % (2./(count_max+6)*100)
     # Push show info
     put.put_show(show)
     if debug:
         print '    Pushed show data'
-    yield 'data: %s\n\n' % (6./(count_max+9)*100)
+    yield 'data: %s\n\n' % (4./(count_max+6)*100)
     # Push episode info
     put.put_episodes(show['title'], show['year'], episodes)
     if debug:
         print '    Pushed episodes data'
-    yield 'data: %s\n\n' % (9./(count_max+9)*100)
+    yield 'data: %s\n\n' % (6./(count_max+6)*100)
 
     # Get YT videos
     yt = ytquery.YtQuery()
@@ -111,9 +113,13 @@ def run_query(title, cache=False, debug=False):
             debug=debug)
         loop.start()
 
-    for _ in episodes.items():
-        yield queue.get()
-        queue.task_done()
+    tcount = 0
+    while tcount < len(episodes):
+        if not queue.empty():
+            out = queue.get(False)
+            tcount += 1
+            yield out
+            queue.task_done()
 
     # Wait until queue done
     queue.join()
