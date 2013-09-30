@@ -123,12 +123,13 @@ This tends to be a bit flaky (their server drops out everyday)
         tmp = self.get_from_api(url, params=query)
         if tmp is not None:
             self.tvdb = {}
-            print tmp['Series']
             try:
+                self.tvdb['Series'] = tmp['Series'][0]
                 for res in tmp['Series']:
-                    if 'FirstAired' not in res: continue
-                    self.tvdb['Series'] = res
-            except TypeError:
+                    if 'FirstAired' in res:
+                        self.tvdb['Series'] = res
+                        break
+            except KeyError:
                 self.tvdb['Series'] = tmp['Series']
         else:
             self.tvdb = None

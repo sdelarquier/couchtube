@@ -107,6 +107,8 @@ class YtQuery(object):
             ep_stem = [self._lancaster.stem(t) \
                 for t in nltk.regexp_tokenize(
                     ep_title.encode('utf8'), r"\w+")]
+        else:
+            ep_stem = None
 
         res = {'Output': qres, 
                'Input': {},}
