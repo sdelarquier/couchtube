@@ -25,13 +25,15 @@ function addShow() {
   $('#modal-search').find('.modal-body').html('<img src="static/img/ajax-loader.gif">')
 
   $.get("/findShow?title="+show, function(data) {
-
+    console.log(data);
     $('#modal-search').find('.modal-body').html('');
 
     var out = "";
     if (data != 'None') {
       out += "<p>Is this the show you are looking for?</p>";
-      out += "<p><b><span id='search-results'>"+data.Series.SeriesName+"</span> ("+data.Series.FirstAired.substr(0,4)+")</b></p>";
+      out += "<p><b><span id='search-results'>"+data.Series.SeriesName+"</span>"
+      out += " ("+data.Series.FirstAired.substr(0,4)+")"
+      out += "</b></p>";
       if (data.Series.banner) {
         out += "<img class='img-thumbnail' src='http://thetvdb.com/banners/"+data.Series.banner+"'>";
       }
