@@ -228,14 +228,19 @@ class DataMerge(DataGrab):
         if test(self.loaded['tvdb'], 'poster'):
             try:
                 if self.tvdb['Series']['poster'] is not None:
-                    self.show['poster'] = 'http://thetvdb.com/banners/%s' % \
+                    url = 'http://thetvdb.com/banners/%s' % \
                         self.tvdb['Series']['poster']
-            except Exception: 
+                    pname = self._dlposter(url)
+                    if pname:
+                        self.show['poster'] = '/%s' % pname
+            except Exception:
                 pass
         if test(self.loaded['imdb'], 'poster'):
             try:
-                self.show['rating'] = self.imdb['rating']
-            except Exception: 
+                pname = self._dlposter(self.imdb['poster'])
+                if pname:
+                    self.show['poster'] = '/%s' % pname
+            except Exception:
                 pass
         # Then runtime (tvdb only)
         if test(self.loaded['tvdb'], 'runtime'):
@@ -281,3 +286,15 @@ class DataMerge(DataGrab):
                     if nep == 1:
                         season_found = False
         self.show['episodes'] = len(self.episodes)
+
+    def _dlposter(self, url):
+        """Downloads and image
+        """
+        r = requests.get(url, stream=True)
+        if r.status_code == 200:
+            img = os.path.split(url)[-1]
+            fname = os.path.join('static/img/posters', img)
+            with open(fname, 'wb') as f:
+                for chunk in r.iter_content():
+                    f.write(chunk)
+            return fname
