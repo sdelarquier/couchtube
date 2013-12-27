@@ -1,4 +1,4 @@
-#!couchtube-env/bin/python2.6
+#!couchtube-env/bin/python2.7
 import flask
 import dbutils
 import datagrab
@@ -103,6 +103,6 @@ def event_stream():
 
 
 if __name__ == '__main__':
-    application.debug = True
+    application.debug = False
     # application.run(host='localhost')
     application.run(host='0.0.0.0')

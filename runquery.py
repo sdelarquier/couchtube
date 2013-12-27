@@ -90,8 +90,26 @@ def run_query(title, cache=False, debug=False):
         show['title'], show['year'], count_max, vid_count, vid_count-paid_count)
 
 
+def run_all(cache=False, debug=False):
+    """Updates all series from the database
+    """
+    db = dbutils.DbGet()
+    series = db.get_shows()
+    db.close()
+    pwd = os.path.abspath(os.path.curdir)
+    for title in series:
+        print title[0]
+        run = run_query(title[0], cache=True, debug=False)
+        for it in run:
+            print it
+
+
 if __name__ == "__main__":
-    title = sys.argv[1]
-    run = run_query(title, cache=True, debug=False)
-    for it in run:
-        print it
+    if len(sys.argv) == 1:
+        run_all(cache=True, debug=False)
+    elif len(sys.argv) == 2:
+        title = sys.argv[1]
+        run = run_query(title, cache=True, debug=False)
+        for it in run:
+            print it
+

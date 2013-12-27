@@ -157,8 +157,11 @@ Each video is scored:
                 continue
 
             # Video duration filter (some parsing recquired)
-            dur_str = v['contentDetails']['duration'].encode('utf8')
-            v['duration'] = self._parse_time(dur_str)
+            try:
+                dur_str = v['contentDetails']['duration'].encode('utf8')
+                v['duration'] = self._parse_time(dur_str)
+            except KeyError:
+                v['duration'] = 0
             if not (1.2 > v['duration']*1./runtime > .5):
                 continue
 
