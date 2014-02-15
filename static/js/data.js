@@ -7,7 +7,9 @@ function getShow(show) {
     $.each(data, function(ind, val) {
       if (val['title']==show) {
         found = true;
-        $('#modal-'+show.replace(/ /g, "").replace(/!/g, "")).modal('show');
+        console.log(show)
+        console.log(val['title_iso'])
+        $('#modal-'+val['title_iso']).modal('show');
       }
     });
 

@@ -50,12 +50,18 @@ class DbGet(DbAccess):
             SELECT title, year, poster, episodes, ytcount, 
                 (episodes - ytLicensed)/episodes*100 as ppay, 
                 ytcount/episodes as ytrep, 
-                runtime
+                runtime, title_iso, img
             FROM series
             ORDER BY ytrep DESC
                  """)
         self.cursor.execute(query)
-        return [s for s in self.cursor]
+        shows = [s for s in self.cursor]
+        # for s in self.cursor:
+        #     imgblob = s[9].decode('base64')
+        #     s = list(s)
+        #     s[9] = imgblob
+        #     shows.append(tuple(s))
+        return shows
 
     def get_episodes(self, show, year):
         """Get all episodes of a given show
@@ -128,24 +134,30 @@ class DbPut(DbAccess):
         """Add a show to the series table
         """
         query = ("INSERT INTO series "
-               " (title, episodes, poster, rating, year, runtime) "
-               " VALUES (%s, %s, %s, %s, %s, %s) "
+               " (title, episodes, poster, rating, year, runtime, img, title_iso) "
+               " VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
                " ON DUPLICATE KEY UPDATE "
                "   title=VALUES(title), "
                "   episodes=VALUES(episodes), "
                "   rating=VALUES(rating), "
                "   poster=VALUES(poster), "
                "   year=VALUES(year), "
-               "   runtime=VALUES(runtime) ")
+               "   runtime=VALUES(runtime), "
+               "   img=VALUES(img), "
+               "   title_iso=VALUES(title_iso) ")
         params = (
             show['title'], 
             show['episodes'], 
             show['poster'], 
             show['rating'], 
             show["year"], 
-            show["runtime"])
+            show["runtime"],
+            requests.get(url).content.encode('base64'),
+            ''.join(re.findall('(\w+|\d)', 
+                show['title'].lower() + str(show['year']))))
         self.cursor.execute(query, params)
         self.cnx.commit()
+        return True
 
     def put_episodes(self, show, year, episodes):
         """Add a show to the series table
@@ -165,6 +177,7 @@ class DbPut(DbAccess):
             name) for key, name in episodes.items()]
         self.cursor.executemany(query, params)
         self.cnx.commit()
+        return True
 
     def update_show(self, show, year, field, value):
         """Update series table with field value
@@ -177,6 +190,7 @@ class DbPut(DbAccess):
         params = (value, show, year)
         self.cursor.execute(query, params)
         self.cnx.commit()
+        return True
 
     def update_episode(self, show, year, 
         se_number, ep_number, field, value):
@@ -192,3 +206,27 @@ class DbPut(DbAccess):
             ep_number, se_number)
         self.cursor.execute(query, params)
         self.cnx.commit()
+        return True
+
+
+    def remove_show(self, show, year):
+        """Remove all data for given show
+        """
+        # First delite episodes
+        query = ("""
+            DELETE FROM episodes
+            WHERE series_title=%s AND series_year=%s;
+            """)
+        params = (show, year)
+        self.cursor.execute(query, params)
+        self.cnx.commit()
+        # Then delete show info
+        query = ("""
+            DELETE FROM series
+            WHERE title=%s AND year=%s;
+            """)
+        params = (show, year)
+        self.cursor.execute(query, params)
+        self.cnx.commit()
+        return True
+

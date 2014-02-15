@@ -4,9 +4,11 @@ import dbutils
 import datagrab
 import runquery
 import json
+import requests
 
 
 application = flask.Flask(__name__)
+
 
 @application.route('/bar')
 def bar():
@@ -34,6 +36,7 @@ def shows(json_obj=True):
             series_json.append(
                 {
                     'title': show[0],
+                    'title_iso': show[8],
                     'tokens': show[0].split()
                 })
         return json.dumps(series_json)
@@ -103,6 +106,6 @@ def event_stream():
 
 
 if __name__ == '__main__':
-    application.debug = False
-    # application.run(host='localhost')
-    application.run(host='0.0.0.0')
+    application.debug = True
+    application.run(host='localhost')
+    # application.run(host='0.0.0.0')
