@@ -3,6 +3,8 @@ from mysql.connector import errorcode
 import json
 import os
 import sys
+import requests
+import re
 import nltk
 
 
@@ -152,7 +154,7 @@ class DbPut(DbAccess):
             show['rating'], 
             show["year"], 
             show["runtime"],
-            requests.get(url).content.encode('base64'),
+            requests.get(show['poster']).content.encode('base64'),
             ''.join(re.findall('(\w+|\d)', 
                 show['title'].lower() + str(show['year']))))
         self.cursor.execute(query, params)

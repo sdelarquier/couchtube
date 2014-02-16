@@ -228,7 +228,7 @@ class DataMerge(DataGrab):
         if test(self.loaded['tvdb'], 'poster'):
             try:
                 if self.tvdb['Series']['poster'] is not None:
-                    url = 'http://thetvdb.com/banners/%s' % \
+                    url = 'http://thetvdb.com/banners/_cache/%s' % \
                         self.tvdb['Series']['poster']
                     # pname = self._dlposter(url)
                     # if pname:
