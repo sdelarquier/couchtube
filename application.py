@@ -106,6 +106,6 @@ def event_stream():
 
 
 if __name__ == '__main__':
-    application.debug = True
-    application.run(host='localhost')
-    # application.run(host='0.0.0.0')
+    application.debug = False
+    # application.run(host='localhost')
+    application.run(host='0.0.0.0')
